@@ -48,7 +48,6 @@
         :label-width="labelWidth"
         :inline="true"
         :model="formEdit"
-        rules="rules"
         class="demo-form-inline"
       >
         <el-form-item label="职工编号">
@@ -101,24 +100,24 @@
         :rules="rules"
         class="demo-form-inline"
       >
-        <el-form-item label="职工编号">
+        <el-form-item label="职工编号" prop="teacherId"> 
           <el-input v-model="formAdd.teacherId" placeholder="职工编号"></el-input>
         </el-form-item>
-        <el-form-item label="姓名">
+        <el-form-item label="姓名" prop="name">
           <el-input v-model="formAdd.name" placeholder="姓名"></el-input>
         </el-form-item>
 
-        <el-form-item label="性别">
+        <el-form-item label="性别" prop="gender">
           <el-radio v-model="formAdd.gender" label="0">女</el-radio>
           <el-radio v-model="formAdd.gender" label="1">男</el-radio>
         </el-form-item>
-        <el-form-item label="办公室">
+        <el-form-item label="办公室" prop="office">
           <el-input v-model="formAdd.office" placeholder="办公室"></el-input>
         </el-form-item>
-        <el-form-item label="邮箱">
+        <el-form-item label="邮箱" prop="email">
           <el-input v-model="formAdd.email" placeholder="邮箱"></el-input>
         </el-form-item>
-        <el-form-item label="电话">
+        <el-form-item label="电话" prop="phone">
           <el-input v-model="formAdd.phone" placeholder="电话"></el-input>
         </el-form-item>
         <el-form-item label="教授课程" prop="type">
@@ -164,10 +163,16 @@ export default {
           {
             type: "array",
             required: true,
-            message: "请至少选择一个活动性质",
+            message: "请至少选择一节课",
             trigger: "change"
           }
-        ]
+        ],
+        teacherId: [{required:true, message: '请输入课程编号', trigger: 'blur'}],
+        name:[{required:true, message: '请输入课程编号', trigger: 'blur'}],
+        gender:[{required:true, message: '请输入课程编号', trigger: 'blur'}],
+        email:[{type:"email",required:true, message: '请输入课程编号', trigger: 'blur'}],
+        phone:[{type:"telephone",required:true, message: '请输入课程编号', trigger: 'blur'}],
+        office:[{required:true, message: '请输入课程编号', trigger: 'blur'}]
       },
       cities: cityOptions,
       pageInfo: {
@@ -179,7 +184,7 @@ export default {
         {
           teacherId: "2015210912",
           name: "周灰灰",
-          courses: "2017-1-12",
+          courses: ["上海","北京"],
           gender: "0",
           office: "9289",
           email: "137834956@qq.com",
@@ -188,7 +193,7 @@ export default {
         {
           teacherId: "2015210913",
           name: "赵灰灰",
-          courses: "2017-1-12",
+          courses:  ["上海","北京"],
           gender: "0",
           office: "9289",
           email: "137834956@qq.com",
@@ -197,7 +202,7 @@ export default {
         {
           teacherId: "2015210911",
           name: "钱灰灰",
-          courses: "2017-1-12",
+          courses:  ["上海","北京"],
           gender: 1,
           office: "9289",
           email: "137834956@qq.com",
@@ -206,7 +211,7 @@ export default {
         {
           teacherId: "2015210914",
           name: "孙灰灰",
-          courses: "2017-1-12",
+          courses: ["上海","北京"],
           gender: 0,
           office: "9289",
           email: "137834956@qq.com",
@@ -215,7 +220,7 @@ export default {
         {
           teacherId: "2015210912",
           name: "周灰灰",
-          courses: "2017-1-12",
+          courses:  ["上海","北京"],
           gender: 0,
           office: "9289",
           email: "137834956@qq.com",
@@ -262,6 +267,7 @@ export default {
   methods: {
     handleCheckedCitiesChange(value) {
       let checkedCount = value.length;
+      console.log("点击");
       this.checkAll = checkedCount === this.cities.length;
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.cities.length;
@@ -320,9 +326,6 @@ export default {
           this.pageInfo.pageSize,
         type: "success"
       });
-    },
-    onSubmit() {
-      console.log("submit!");
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;

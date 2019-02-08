@@ -142,7 +142,7 @@
 
 <script>
 export default {
-  name: "tablepage",
+  name: "students",
   data() {
     return {
       pageInfo: {

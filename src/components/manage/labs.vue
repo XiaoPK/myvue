@@ -47,6 +47,7 @@
           :label-position="labelPosition"
           label-width="100px"
           :inline="true"
+          :rules="rules"
           :model="formAdd"
         >
           <el-form-item label="实验室编号">
@@ -141,9 +142,15 @@ h2{
 
 <script>
 export default {
-  name: "tablepage",
+  name: "labs",
   data() {
     return {
+      rules:{
+        labId: [{required:true,messsage:'请输入实验室编号',trigger:'blur'}],
+        name:[{required:true, message: '请输入实验室名称',trigger: 'blur'}],
+        holdPeople:[{required:true, message: '请输入实验室容量',trigger: 'blur'}],
+        state:[{type:"boolen",required:true, message: '请输入实验室状态',trigger: 'blur'}]
+      },
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,

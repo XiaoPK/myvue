@@ -140,7 +140,7 @@ h2{
 
 <script>
 export default {
-  name: "tablepage",
+  name: "courses",
   data() {
     return {
       
