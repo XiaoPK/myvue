@@ -12,14 +12,14 @@
           :data="tableData"
           stripe
           style="width: 640px"
-          :default-sort="{prop: 'courseId', order: 'descending'}"
+          :default-sort="{prop: 'courseNumber', order: 'descending'}"
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="50"></el-table-column>
-          <el-table-column prop="courseId" sortable label="课程编号" width="100"></el-table-column>
-          <el-table-column prop="name" label="课程名称" width="100"></el-table-column>
+          <el-table-column prop="courseNumber" sortable label="课程编号" width="100"></el-table-column>
+          <el-table-column prop="courseName" label="课程名称" width="100"></el-table-column>
           <el-table-column prop="period" label="课时" width="50"></el-table-column>
-          <el-table-column prop="summary" label="课程简介" width="160"></el-table-column>
+          <el-table-column prop="courseDesc" label="课程简介" width="160"></el-table-column>
           <el-table-column label="操作" fixed="right" min-width="120">
             <template slot-scope="scope">
               <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
@@ -50,17 +50,17 @@
           :inline="true"
           :model="formAdd"
         >
-          <el-form-item label="课程编号" prop="courseId">
-            <el-input v-model="formAdd.courseId" placeholder="课程编号"></el-input>
+          <el-form-item label="课程编号" prop="courseNumber">
+            <el-input v-model="formAdd.courseNumber" placeholder="课程编号"></el-input>
           </el-form-item>
-          <el-form-item label="课程名称" prop="name">
-            <el-input v-model="formAdd.name" placeholder="课程名称"></el-input>
+          <el-form-item label="课程名称" prop="courseName">
+            <el-input v-model="formAdd.courseName" placeholder="课程名称"></el-input>
           </el-form-item>
           <el-form-item label="课时量" prop="period">
             <el-input v-model="formAdd.period" type="number" placeholder="课时量"></el-input>
           </el-form-item>
-          <el-form-item label="课程简介" prop="summary">
-            <el-input type="textarea" v-model="formAdd.summary" placeholder="课程简介"></el-input>
+          <el-form-item label="课程简介" prop="courseDesc">
+            <el-input type="textarea" v-model="formAdd.courseDesc" placeholder="课程简介"></el-input>
           </el-form-item>
 
           <a class="btn-add" type="primary" @click="save(formAdd)">确定添加</a>
@@ -77,17 +77,17 @@
         class="demo-form-inline"
       >
         <el-form-item label="课程编号">
-          <el-input v-model="formEdit.courseId" placeholder="课程编号"></el-input>
+          <el-input v-model="formEdit.courseNumber" placeholder="课程编号"></el-input>
         </el-form-item>
         <el-form-item label="课程名称">
-          <el-input v-model="formEdit.name" placeholder="课程名称"></el-input>
+          <el-input v-model="formEdit.courseName" placeholder="课程名称"></el-input>
         </el-form-item>
 
         <el-form-item label="课时量">
           <el-input v-model="formEdit.period" placeholder="课时量"></el-input>
         </el-form-item>
         <el-form-item label="课程简介">
-          <el-input type="textarea" v-model="formEdit.summary" placeholder="课程简介"></el-input>
+          <el-input type="textarea" v-model="formEdit.courseDesc" placeholder="课程简介"></el-input>
         </el-form-item>
       </el-form>
 
@@ -139,8 +139,9 @@ h2 {
 </style>
 
 <script>
+import * as courseApi from "../../apis/courses.js";
 export default {
-  name: "courses",
+  courseName: "courses",
   data() {
     return {
       pageInfo: {
@@ -148,72 +149,43 @@ export default {
         pageSize: 5,
         pageTotal: 16
       },
-      tableData: [
-        {
-          courseId: "9301",
-          name: "1号机房",
-          period: "50",
-          summary: "从前有座山，山里有座庙，庙里有个盆，盆里有个人。"
-        },
-        {
-          courseId: "9301",
-          name: "1号机房",
-          period: "50",
-          summary: "1"
-        },
-        {
-          courseId: "9302",
-          name: "2号机房",
-          period: "50",
-          summary: "1"
-        },
-        {
-          courseId: "9303",
-          name: "3号机房",
-          period: "50",
-          summary: "1"
-        },
-        {
-          courseId: "9304",
-          name: "4号机房",
-          period: "50",
-          summary: "1"
-        }
-      ],
+      tableData: [],
       labelPosition: "right", //lable对齐方式
       labelWidth: "100px", //lable宽度
       form: {
-        courseId: "",
-        name: "",
+        courseNumber: "",
+        courseName: "",
         period: "",
-        summary: ""
+        courseDesc: ""
       },
       dialogFormVisible: false,
       dialogAddVisible: false,
       formLabelWidth: "120px",
       formAdd: {
         //表单对象
-        courseId: "",
-        name: "",
+        courseNumber: "",
+        courseName: "",
         period: "",
-        summary: ""
+        courseDesc: ""
       },
       rules: {
-        courseId: [
+        courseNumber: [
           { required: true, message: "请输入课程编号", trigger: "blur" }
         ],
-        name: [{ required: true, message: "请输入课程名称", trigger: "blur" }],
+        courseName: [
+          { required: true, message: "请输入课程名称", trigger: "blur" }
+        ],
         period: [{ required: true, message: "请输入课时量", trigger: "blur" }],
-        summary: [
+        courseDesc: [
           { required: true, message: "请输入课程简介", trigger: "blur" }
         ]
       },
       formEdit: {
         //表单对象
-        courseId: "",
-        name: "",
+        courseNumber: "",
+        courseName: "",
         period: "",
-        summary: ""
+        courseDesc: ""
       },
       multipleSelection: []
     };
@@ -237,8 +209,8 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.tableData.splice(index, 1);
-          console.log(index + "---" + rowData.courseId);
+          courseApi.del(rowData.courseNumber);
+          console.log(index + "---" + rowData.courseNumber);
           this.$message({
             type: "success",
             message: "删除成功!" + msg
@@ -253,6 +225,19 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
+      courseApi
+        .query(this.pageInfo.pageIndex, this.pageInfo.pageSize)
+        .then(res => {
+          if (res.message == "success") {
+            this.$message.success("请求成功");
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+
       this.$message({
         message:
           "第" +
@@ -265,6 +250,19 @@ export default {
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
+      courseApi
+        .query(this.pageInfo.pageIndex, this.pageInfo.pageSize)
+        .then(res => {
+          if (res.message == "success") {
+            this.$message.success("请求成功");
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+
       this.$message({
         message:
           "第" +
@@ -291,28 +289,44 @@ export default {
     },
     save(param) {
       //let param = Object.assign({}, this.formAdd);
-      let flag = true;
-      let flagstr = "";
+      let flag = false;
       Object.keys(param).forEach(function(key) {
         if (!param[key]) {
-          flag = false;
-          flagstr += key + ",";
+          flag = true;
         }
       });
       if (flag) {
-        if (!this.dialogFormVisible) {
-          this.tableData.push(param);
-          this.formAdd = {};
-        } else {
-          this.formEdit = param;
-          this.dialogFormVisible = false;
-        }
+        this.$message.error("请将课程信息填写完整！");
+        return;
+      }
+      if (!this.dialogFormVisible) {
+        courseApi
+          .add(this.formAdd)
+          .then(res => {
+            if (res.message == "success") {
+              this.$message.success("添加成功");
+              this.formAdd = {};
+            } else {
+              this.$message.error("添加失败，错误描述为：" + res.message);
+            }
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
       } else {
-        let msg = "请输入" + flagstr;
-        this.$message({
-          message: msg,
-          type: "warning"
-        });
+        courseApi
+          .update(param)
+          .then(res => {
+            if (res.message == "success") {
+              this.$message.success("添加成功");
+              this.dialogFormVisible = false;
+            } else {
+              this.$message.error("添加失败，错误描述为：" + res.message);
+            }
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
       }
     }
   }
