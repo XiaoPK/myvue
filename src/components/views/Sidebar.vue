@@ -47,10 +47,6 @@
                              {
                                 index: 'teachers',
                                 title: '教师管理'
-                            },
-                            {
-                                index: 'terms',
-                                title: '学期管理'
                             }
                         ]
                     },
@@ -60,9 +56,14 @@
                         title: '课程分配',
                         subs: [
                             {
+                                index: 'assignrules',
+                                title: '分配规则'
+                            },
+                            {
                                 index: 'assignlabs',
                                 title: '分配实验室'
                             }, 
+                            
                             {
                                 index: 'adjustment',
                                 title: '调整实验室'

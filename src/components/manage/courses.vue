@@ -59,11 +59,11 @@
           <el-form-item label="课时量" prop="period">
             <el-input v-model="formAdd.period" type="number" placeholder="课时量"></el-input>
           </el-form-item>
-          <el-form-item label="课程简介">
-            <el-input type="textarea"   v-model="formAdd.summary" placeholder="课程简介"></el-input>
+          <el-form-item label="课程简介" prop="summary">
+            <el-input type="textarea" v-model="formAdd.summary" placeholder="课程简介"></el-input>
           </el-form-item>
 
-          <a class="btn-add" type="primary" @click="save()">确定添加</a>
+          <a class="btn-add" type="primary" @click="save(formAdd)">确定添加</a>
         </el-form>
       </div>
     </div>
@@ -87,13 +87,13 @@
           <el-input v-model="formEdit.period" placeholder="课时量"></el-input>
         </el-form-item>
         <el-form-item label="课程简介">
-            <el-input type="textarea"   v-model="formEdit.summary" placeholder="课程简介"></el-input>
-          </el-form-item>
+          <el-input type="textarea" v-model="formEdit.summary" placeholder="课程简介"></el-input>
+        </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -102,7 +102,7 @@
 </template>
 
 <style scroped>
-h2{
+h2 {
   text-align: center;
   font-weight: normal;
   margin-bottom: 15px;
@@ -129,8 +129,8 @@ h2{
   font-size: 18px;
   text-align: center;
   cursor: pointer;
-  margin:8px auto;
-  background-color: #409EFF;
+  margin: 8px auto;
+  background-color: #409eff;
   color: #fff;
 }
 .btn-add:hover {
@@ -143,7 +143,6 @@ export default {
   name: "courses",
   data() {
     return {
-      
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
@@ -186,8 +185,8 @@ export default {
       form: {
         courseId: "",
         name: "",
-        period:"",
-        summary:""
+        period: "",
+        summary: ""
       },
       dialogFormVisible: false,
       dialogAddVisible: false,
@@ -196,20 +195,25 @@ export default {
         //表单对象
         courseId: "",
         name: "",
-        period:"",
-        summary:""
+        period: "",
+        summary: ""
       },
       rules: {
-        courseId:[{required :true, message: '请输入课程编号', trigger: 'blur'}],
-        name:[{required:true, message: '请输入课程名称',trigger: 'blur'}],
-        period:[{required:true,message:'请输入课时量',trigger:'blur'}]
+        courseId: [
+          { required: true, message: "请输入课程编号", trigger: "blur" }
+        ],
+        name: [{ required: true, message: "请输入课程名称", trigger: "blur" }],
+        period: [{ required: true, message: "请输入课时量", trigger: "blur" }],
+        summary: [
+          { required: true, message: "请输入课程简介", trigger: "blur" }
+        ]
       },
       formEdit: {
         //表单对象
         courseId: "",
         name: "",
-        period:"",
-        summary:""
+        period: "",
+        summary: ""
       },
       multipleSelection: []
     };
@@ -234,6 +238,7 @@ export default {
       })
         .then(() => {
           this.tableData.splice(index, 1);
+          console.log(index + "---" + rowData.courseId);
           this.$message({
             type: "success",
             message: "删除成功!" + msg
@@ -284,10 +289,31 @@ export default {
         type: "success"
       });
     },
-    save() {
-      let param = Object.assign({}, this.formAdd);
-      this.tableData.push(param);
-      this.formAdd = {};
+    save(param) {
+      //let param = Object.assign({}, this.formAdd);
+      let flag = true;
+      let flagstr = "";
+      Object.keys(param).forEach(function(key) {
+        if (!param[key]) {
+          flag = false;
+          flagstr += key + ",";
+        }
+      });
+      if (flag) {
+        if (!this.dialogFormVisible) {
+          this.tableData.push(param);
+          this.formAdd = {};
+        } else {
+          this.formEdit = param;
+          this.dialogFormVisible = false;
+        }
+      } else {
+        let msg = "请输入" + flagstr;
+        this.$message({
+          message: msg,
+          type: "warning"
+        });
+      }
     }
   }
 };

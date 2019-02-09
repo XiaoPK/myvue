@@ -22,7 +22,7 @@
       <el-table-column prop="date" sortable label="出生日期" width="150"></el-table-column>
       <el-table-column prop="grade" sortable label="年级" width="100"></el-table-column>
       <el-table-column prop="collage" label="学院" width="150"></el-table-column>
-      <el-table-column label="操作" fixed="right" >
+      <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
           <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
@@ -79,7 +79,7 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -123,7 +123,7 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAddVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save">确 定</el-button>
+        <el-button type="primary" @click="save(formAdd)">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -135,7 +135,7 @@
 .el-form-item__content {
   width: 220px;
 }
-.right{
+.right {
   float: right;
 }
 </style>
@@ -155,7 +155,7 @@ export default {
           studentId: "2015210912",
           name: "周灰灰",
           date: "2017-1-12",
-          gender: '0',
+          gender: "0",
           grade: "2015",
           collage: "计算机学院"
         },
@@ -163,7 +163,7 @@ export default {
           studentId: "2015210913",
           name: "赵灰灰",
           date: "2017-1-12",
-          gender: '0',
+          gender: "0",
           grade: "2015",
           collage: "计算机学院"
         },
@@ -283,9 +283,9 @@ export default {
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       form: {
-        studentId:"",
+        studentId: "",
         name: "",
-        gender:"",
+        gender: "",
         grade: "",
         date: "",
         collage: ""
@@ -295,18 +295,18 @@ export default {
       formLabelWidth: "120px",
       formAdd: {
         //表单对象
-        studentId:"",
+        studentId: "",
         name: "",
-        gender:"",
+        gender: "",
         grade: "",
         date: "",
         collage: ""
       },
       formEdit: {
         //表单对象
-        studentId:"",
+        studentId: "",
         name: "",
-        gender:"",
+        gender: "",
         grade: "",
         date: "",
         collage: ""
@@ -387,10 +387,32 @@ export default {
         type: "success"
       });
     },
-    save() {
-      let param = Object.assign({}, this.formAdd);
-      this.tableData.push(param);
-      this.dialogAddVisible = false;
+    save(param) {
+      //let param = Object.assign({}, this.formAdd);
+      let flag = true;
+      let flagstr = "";
+      Object.keys(param).forEach(function(key) {
+        if (!param[key]) {
+          flag = false;
+          flagstr += key + ",";
+        }
+      });
+      if (flag) {
+        if (!this.dialogFormVisible) {
+          this.tableData.push(param);
+          this.formAdd = {};
+          this.dialogAddVisible = false;
+        } else {
+          this.formEdit = param;
+          this.dialogFormVisible = false;
+        }
+      } else {
+        let msg = "请输入" + flagstr;
+        this.$message({
+          message: msg,
+          type: "warning"
+        });
+      }
     }
   }
 };

@@ -57,14 +57,14 @@
             <el-input v-model="formAdd.name" placeholder="实验室名称"></el-input>
           </el-form-item>
           <el-form-item label="可容纳人数">
-            <el-input v-model="formAdd.holdPeople" type="number" placeholder="可容纳人数"></el-input>
+            <el-input v-model="formAdd.holdPeople" type="number" min="0" placeholder="可容纳人数"></el-input>
           </el-form-item>
 
           <el-form-item label="是否可用">
             <el-radio v-model="formAdd.state" label="0">否</el-radio>
             <el-radio v-model="formAdd.state" label="1">是</el-radio>
           </el-form-item>
-          <a class="btn-add" type="primary" @click="save()">确定添加</a>
+          <a class="btn-add" type="primary" @click="save(formAdd)">确定添加</a>
         </el-form>
       </div>
     </div>
@@ -95,7 +95,7 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -104,7 +104,7 @@
 </template>
 
 <style scroped>
-h2{
+h2 {
   text-align: center;
   font-weight: normal;
   margin-bottom: 15px;
@@ -131,8 +131,8 @@ h2{
   font-size: 18px;
   text-align: center;
   cursor: pointer;
-  margin:8px auto;
-  background-color: #409EFF;
+  margin: 8px auto;
+  background-color: #409eff;
   color: #fff;
 }
 .btn-add:hover {
@@ -145,11 +145,24 @@ export default {
   name: "labs",
   data() {
     return {
-      rules:{
-        labId: [{required:true,messsage:'请输入实验室编号',trigger:'blur'}],
-        name:[{required:true, message: '请输入实验室名称',trigger: 'blur'}],
-        holdPeople:[{required:true, message: '请输入实验室容量',trigger: 'blur'}],
-        state:[{type:"boolen",required:true, message: '请输入实验室状态',trigger: 'blur'}]
+      rules: {
+        labId: [
+          { required: true, messsage: "请输入实验室编号", trigger: "blur" }
+        ],
+        name: [
+          { required: true, message: "请输入实验室名称", trigger: "blur" }
+        ],
+        holdPeople: [
+          { required: true, message: "请输入实验室容量", trigger: "blur" }
+        ],
+        state: [
+          {
+            type: "boolen",
+            required: true,
+            message: "请输入实验室状态",
+            trigger: "blur"
+          }
+        ]
       },
       pageInfo: {
         pageIndex: 1,
@@ -193,8 +206,8 @@ export default {
       form: {
         labId: "",
         name: "",
-        holdPeople:"",
-        state:""
+        holdPeople: "",
+        state: ""
       },
       dialogFormVisible: false,
       dialogAddVisible: false,
@@ -203,15 +216,15 @@ export default {
         //表单对象
         labId: "",
         name: "",
-        holdPeople:"",
-        state:""
+        holdPeople: "",
+        state: ""
       },
       formEdit: {
         //表单对象
         labId: "",
         name: "",
-        holdPeople:"",
-        state:""
+        holdPeople: "",
+        state: ""
       },
       multipleSelection: []
     };
@@ -289,10 +302,31 @@ export default {
         type: "success"
       });
     },
-    save() {
-      let param = Object.assign({}, this.formAdd);
-      this.tableData.push(param);
-      this.formAdd = [];
+    save(param) {
+      //let param = Object.assign({}, this.formAdd);
+      let flag = true;
+      let flagstr = "";
+      Object.keys(param).forEach(function(key) {
+        if (!param[key]) {
+          flag = false;
+          flagstr += key + ",";
+        }
+      });
+      if (flag) {
+        if (!this.dialogFormVisible) {
+          this.tableData.push(param);
+          this.formAdd = {};
+        } else {
+          this.formEdit = param;
+          this.dialogFormVisible = false;
+        }
+      } else {
+        let msg = "请输入" + flagstr;
+        this.$message({
+          message: msg,
+          type: "warning"
+        });
+      }
     }
   }
 };

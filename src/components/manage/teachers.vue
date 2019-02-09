@@ -85,7 +85,7 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -100,7 +100,7 @@
         :rules="rules"
         class="demo-form-inline"
       >
-        <el-form-item label="职工编号" prop="teacherId"> 
+        <el-form-item label="职工编号" prop="teacherId">
           <el-input v-model="formAdd.teacherId" placeholder="职工编号"></el-input>
         </el-form-item>
         <el-form-item label="姓名" prop="name">
@@ -135,7 +135,7 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAddVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save">确 定</el-button>
+        <el-button type="primary" @click="save(formAdd)">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -166,13 +166,7 @@ export default {
             message: "请至少选择一节课",
             trigger: "change"
           }
-        ],
-        teacherId: [{required:true, message: '请输入课程编号', trigger: 'blur'}],
-        name:[{required:true, message: '请输入课程编号', trigger: 'blur'}],
-        gender:[{required:true, message: '请输入课程编号', trigger: 'blur'}],
-        email:[{type:"email",required:true, message: '请输入课程编号', trigger: 'blur'}],
-        phone:[{type:"telephone",required:true, message: '请输入课程编号', trigger: 'blur'}],
-        office:[{required:true, message: '请输入课程编号', trigger: 'blur'}]
+        ]
       },
       cities: cityOptions,
       pageInfo: {
@@ -184,7 +178,7 @@ export default {
         {
           teacherId: "2015210912",
           name: "周灰灰",
-          courses: ["上海","北京"],
+          courses: ["上海", "北京"],
           gender: "0",
           office: "9289",
           email: "137834956@qq.com",
@@ -193,7 +187,7 @@ export default {
         {
           teacherId: "2015210913",
           name: "赵灰灰",
-          courses:  ["上海","北京"],
+          courses: ["上海", "北京"],
           gender: "0",
           office: "9289",
           email: "137834956@qq.com",
@@ -202,7 +196,7 @@ export default {
         {
           teacherId: "2015210911",
           name: "钱灰灰",
-          courses:  ["上海","北京"],
+          courses: ["上海", "北京"],
           gender: 1,
           office: "9289",
           email: "137834956@qq.com",
@@ -211,7 +205,7 @@ export default {
         {
           teacherId: "2015210914",
           name: "孙灰灰",
-          courses: ["上海","北京"],
+          courses: ["上海", "北京"],
           gender: 0,
           office: "9289",
           email: "137834956@qq.com",
@@ -220,7 +214,7 @@ export default {
         {
           teacherId: "2015210912",
           name: "周灰灰",
-          courses:  ["上海","北京"],
+          courses: ["上海", "北京"],
           gender: 0,
           office: "9289",
           email: "137834956@qq.com",
@@ -341,10 +335,32 @@ export default {
         type: "success"
       });
     },
-    save() {
-      let param = Object.assign({}, this.formAdd);
-      this.tableData.push(param);
-      this.dialogAddVisible = false;
+    save(param) {
+      //let param = Object.assign({}, this.formAdd);
+      let flag = true;
+      let flagstr = "";
+      Object.keys(param).forEach(function(key) {
+        if (!param[key]) {
+          flag = false;
+          flagstr += key + ",";
+        }
+      });
+      if (flag) {
+        if (!this.dialogFormVisible) {
+          this.tableData.push(param);
+          this.formAdd = {};
+          this.dialogAddVisible = false;
+        } else {
+          this.formEdit = param;
+          this.dialogFormVisible = false;
+        }
+      } else {
+        let msg = "请输入" + flagstr;
+        this.$message({
+          message: msg,
+          type: "warning"
+        });
+      }
     }
   }
 };
