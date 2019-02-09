@@ -53,7 +53,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
     .content_wrapper{
        display: flex;
        flex-direction: column;

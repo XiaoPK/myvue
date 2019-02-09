@@ -47,8 +47,16 @@ export default new Router({
         },
         {
           path: '/assignrules',
-          name: 'assignrules',
-          component: resolve => require(['../components/manage/assignrules.vue'],resolve),
+          name: 'test',
+          component: resolve => require(['../components/manage/test.vue'],resolve),
+          meta:{
+            title:'分配规则'
+          }
+        },
+        {
+          path: '/assignlabs',
+          name: 'assignrlabs',
+          component: resolve => require(['../components/manage/assignlabs.vue'],resolve),
           meta:{
             title:'分配规则管理'
           }
