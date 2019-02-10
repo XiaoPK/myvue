@@ -16,17 +16,17 @@
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="50"></el-table-column>
-      <el-table-column prop="teacherId" sortable label="职工编号" width="130"></el-table-column>
-      <el-table-column prop="name" sortable label="姓名" width="100"></el-table-column>
-      <el-table-column prop="gender" label="性别" width="60"></el-table-column>
-      <el-table-column prop="courses" label="教授课程" width="150"></el-table-column>
+      <el-table-column prop="teacherNumber" sortable label="职工编号" width="130"></el-table-column>
+      <el-table-column prop="teacherName" sortable label="姓名" width="100"></el-table-column>
+      <el-table-column prop="sex" label="性别" width="60"></el-table-column>
+      <el-table-column prop="teachCourses" label="教授课程" width="150"></el-table-column>
       <el-table-column prop="office" label="办公室" width="120"></el-table-column>
       <el-table-column prop="email" label="邮箱" width="160"></el-table-column>
       <el-table-column prop="phone" label="电话" width="120"></el-table-column>
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -51,15 +51,15 @@
         class="demo-form-inline"
       >
         <el-form-item label="职工编号">
-          <el-input v-model="formEdit.teacherId" placeholder="职工编号"></el-input>
+          <el-input v-model="formEdit.teacherNumber" placeholder="职工编号"></el-input>
         </el-form-item>
         <el-form-item label="姓名">
-          <el-input v-model="formEdit.name" placeholder="姓名"></el-input>
+          <el-input v-model="formEdit.teacherName" placeholder="姓名"></el-input>
         </el-form-item>
 
         <el-form-item label="性别">
-          <el-radio v-model="formEdit.gender" label="0">女</el-radio>
-          <el-radio v-model="formEdit.gender" label="1">男</el-radio>
+          <el-radio v-model="formEdit.sex" label="2">女</el-radio>
+          <el-radio v-model="formEdit.sex" label="1">男</el-radio>
         </el-form-item>
         <el-form-item label="办公室">
           <el-input v-model="formEdit.office" placeholder="办公室"></el-input>
@@ -71,7 +71,7 @@
           <el-input v-model="formEdit.phone" placeholder="电话"></el-input>
         </el-form-item>
         <el-form-item label="教授课程" prop="type">
-          <el-checkbox-group v-model="formEdit.courses" size="medium">
+          <el-checkbox-group v-model="formEdit.teachCourses" size="medium">
             <el-checkbox
               v-for="city in cities"
               :label="city"
@@ -85,7 +85,7 @@
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
+        <el-button type="primary" @click="save()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -97,19 +97,18 @@
         :label-width="labelWidth"
         :inline="true"
         :model="formAdd"
-        :rules="rules"
         class="demo-form-inline"
       >
-        <el-form-item label="职工编号" prop="teacherId">
-          <el-input v-model="formAdd.teacherId" placeholder="职工编号"></el-input>
+        <el-form-item label="职工编号" prop="teacherNumber">
+          <el-input v-model="formAdd.teacherNumber" placeholder="职工编号"></el-input>
         </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="formAdd.name" placeholder="姓名"></el-input>
+        <el-form-item label="姓名" prop="teacherName">
+          <el-input v-model="formAdd.teacherName" placeholder="姓名"></el-input>
         </el-form-item>
 
-        <el-form-item label="性别" prop="gender">
-          <el-radio v-model="formAdd.gender" label="0">女</el-radio>
-          <el-radio v-model="formAdd.gender" label="1">男</el-radio>
+        <el-form-item label="性别" prop="sex">
+          <el-radio v-model="formAdd.sex" label="2">女</el-radio>
+          <el-radio v-model="formAdd.sex" label="1">男</el-radio>
         </el-form-item>
         <el-form-item label="办公室" prop="office">
           <el-input v-model="formAdd.office" placeholder="办公室"></el-input>
@@ -121,7 +120,7 @@
           <el-input v-model="formAdd.phone" placeholder="电话"></el-input>
         </el-form-item>
         <el-form-item label="教授课程" prop="type">
-          <el-checkbox-group v-model="formAdd.courses" size="medium">
+          <el-checkbox-group v-model="formAdd.teachCourses" size="medium">
             <el-checkbox
               v-for="city in cities"
               :label="city"
@@ -153,83 +152,29 @@
 </style>
 
 <script>
+import * as teacherApi from '../../apis/teachers.js'
+import * as courseApi from '../../apis/courses.js'
 const cityOptions = ["上海", "北京", "广州", "深圳"];
 export default {
   name: "teachers",
   data() {
     return {
-      rules: {
-        type: [
-          {
-            type: "array",
-            required: true,
-            message: "请至少选择一节课",
-            trigger: "change"
-          }
-        ]
-      },
       cities: cityOptions,
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
         pageTotal: 16
       },
-      tableData: [
-        {
-          teacherId: "2015210912",
-          name: "周灰灰",
-          courses: ["上海", "北京"],
-          gender: "0",
-          office: "9289",
-          email: "137834956@qq.com",
-          phone: "18171263421"
-        },
-        {
-          teacherId: "2015210913",
-          name: "赵灰灰",
-          courses: ["上海", "北京"],
-          gender: "0",
-          office: "9289",
-          email: "137834956@qq.com",
-          phone: "18171263421"
-        },
-        {
-          teacherId: "2015210911",
-          name: "钱灰灰",
-          courses: ["上海", "北京"],
-          gender: 1,
-          office: "9289",
-          email: "137834956@qq.com",
-          phone: "18171263421"
-        },
-        {
-          teacherId: "2015210914",
-          name: "孙灰灰",
-          courses: ["上海", "北京"],
-          gender: 0,
-          office: "9289",
-          email: "137834956@qq.com",
-          phone: "18171263421"
-        },
-        {
-          teacherId: "2015210912",
-          name: "周灰灰",
-          courses: ["上海", "北京"],
-          gender: 0,
-          office: "9289",
-          email: "137834956@qq.com",
-          phone: "18171263421"
-        }
-      ],
+      tableData: [],
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       form: {
-        teacherId: "",
-        name: "",
-        gender: "",
+        teacherNumber: "",
+        teacherName: "",
+        sex: "",
         email: "",
         office: "",
-        courses: [],
+        teachCourses: [],
         phone: ""
       },
       dialogFormVisible: false,
@@ -237,21 +182,21 @@ export default {
       formLabelWidth: "120px",
       formAdd: {
         //表单对象
-        teacherId: "",
-        name: "",
-        gender: "",
+        teacherNumber: "",
+        teacherName: "",
+        sex: "",
         email: "",
-        courses: [],
+        teachCourses: [],
         office: "",
         phone: ""
       },
       formEdit: {
         //表单对象
-        teacherId: "",
-        name: "",
-        gender: "",
+        teacherNumber: "",
+        teacherName: "",
+        sex: "",
         email: "",
-        courses: [],
+        teachCourses: [],
         office: "",
         phone: ""
       },
@@ -259,6 +204,9 @@ export default {
     };
   },
   methods: {
+    getCourses(){
+      courseApi.query(1,6)
+    },
     handleCheckedCitiesChange(value) {
       let checkedCount = value.length;
       console.log("点击");
@@ -266,29 +214,56 @@ export default {
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.cities.length;
     },
-    handleEdit(index, rowData) {
-      var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
-      this.$message({
-        message: msg,
-        type: "success"
-      });
+    handleEdit(rowData) {
       console.log(rowData);
       this.formEdit = rowData;
+      if(this.formEdit.sex == "BOY"){
+        this.formEdit.sex = "1"
+      }else{
+        this.formEdit.sex = "2"
+      }
       this.dialogFormVisible = true;
     },
-    handleDelete(index, rowData) {
-      var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
+    deleteRow(id) {
+      teacherApi
+        .del(id)
+        .then(res => {
+          if (res.code == "140001") {
+            this.$message.success("删除成功！");
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    queryTable(index, size) {
+      teacherApi
+        .query(index, size)
+        .then(res => {
+          console.log(res);
+          if (res.code == "140001") {
+            this.$message.success("请求成功");
+            this.tableData = res.result.results;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    handleDelete(rowData) {
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
-          this.tableData.splice(index, 1);
-          this.$message({
-            type: "success",
-            message: "删除成功!" + msg
-          });
+          this.deleteRow(rowData.id);
         })
         .catch(() => {
           this.$message({
@@ -299,69 +274,63 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(val, this.pageInfo.pageSize);
     },
+
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      this.$message({
-        message: "选中的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
     },
     deleteMany() {
-      var ids = this.multipleSelection.map(item => item.id).join();
-      this.$message({
-        message: "删除的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
+      var ids = this.multipleSelection.map(item => item.id);
+      for (let i = 0; i < ids.length; i++) {
+        this.deleteRow(ids[i]);
+      }
     },
-    save(param) {
-      //let param = Object.assign({}, this.formAdd);
-      let flag = true;
-      let flagstr = "";
-      Object.keys(param).forEach(function(key) {
-        if (!param[key]) {
-          flag = false;
-          flagstr += key + ",";
-        }
-      });
-      if (flag) {
-        if (!this.dialogFormVisible) {
-          this.tableData.push(param);
-          this.formAdd = {};
-          this.dialogAddVisible = false;
-        } else {
-          this.formEdit = param;
-          this.dialogFormVisible = false;
-        }
+    save() {
+      if (!this.dialogFormVisible) {
+        console.log(this.formAdd);
+        teacherApi
+          .add(this.formAdd)
+          .then(res => {
+            console.log(this.formAdd);
+            if (res.code == "140001") {
+              this.$message.success("添加成功");
+              this.formAdd = {};
+              this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+            } else {
+              this.$message.error("error：" + res.message);
+            }
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
+        this.formAdd = {};
+        this.dialogAddVisible = false;
       } else {
-        let msg = "请输入" + flagstr;
-        this.$message({
-          message: msg,
-          type: "warning"
-        });
+        teacherApi
+          .update(this.formEdit)
+          .then(res => {
+            console.log(this.formEdit);
+            if (res.code == "140001") {
+              this.$message.success("保存成功");
+              this.dialogFormVisible = false;
+            } else {
+              this.$message.error("error" + res.message);
+            }
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
       }
     }
+  },
+  created() {
+    this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
   }
 };
 </script>

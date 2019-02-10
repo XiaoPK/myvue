@@ -1,5 +1,5 @@
 import http from './httpServer'
-let apiUrl = "http://alish1.iyuhui.cn:8089/course"
+let apiUrl = "http://alish1.iyuhui.cn:8089/classroom"
  
 export const query = (page, size) => {
   return http.requestQuickGet(apiUrl + "/query/page/" + page + "/" + size);

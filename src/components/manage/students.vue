@@ -12,20 +12,20 @@
       :data="tableData"
       stripe
       style="width: 100%"
-      :default-sort="{prop: 'studentId', order: 'descending'}"
+      :default-sort="{prop: 'studentNumber', order: 'descending'}"
       @selection-change="handleSelectionChange"
     >
       <el-table-column type="selection" width="55"></el-table-column>
-      <el-table-column prop="studentId" sortable label="学号" width="150"></el-table-column>
-      <el-table-column prop="name" sortable label="姓名" width="100"></el-table-column>
-      <el-table-column prop="gender" label="性别" width="80"></el-table-column>
-      <el-table-column prop="date" sortable label="出生日期" width="150"></el-table-column>
+      <el-table-column prop="studentNumber" sortable label="学号" width="150"></el-table-column>
+      <el-table-column prop="studentName" sortable label="姓名" width="100"></el-table-column>
+      <el-table-column prop="sex" label="性别" width="80"></el-table-column>
+      <el-table-column prop="birthday" sortable label="出生日期" width="150"></el-table-column>
       <el-table-column prop="grade" sortable label="年级" width="100"></el-table-column>
-      <el-table-column prop="collage" label="学院" width="150"></el-table-column>
+      <el-table-column prop="college" label="学院" width="150"></el-table-column>
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -50,14 +50,14 @@
         class="demo-form-inline"
       >
         <el-form-item label="姓名">
-          <el-input v-model="formEdit.name" placeholder="姓名"></el-input>
+          <el-input v-model="formEdit.studentName" placeholder="姓名"></el-input>
         </el-form-item>
         <el-form-item label="学号">
-          <el-input v-model="formEdit.studentId" placeholder="学号"></el-input>
+          <el-input v-model="formEdit.studentNumber" placeholder="学号"></el-input>
         </el-form-item>
         <el-form-item label="性别">
-          <el-radio v-model="formEdit.gender" label="0">女</el-radio>
-          <el-radio v-model="formEdit.gender" label="1">男</el-radio>
+          <el-radio v-model="formEdit.sex" label="2">女</el-radio>
+          <el-radio v-model="formEdit.sex" label="1">男</el-radio>
         </el-form-item>
         <el-form-item label="出生日期">
           <el-date-picker
@@ -65,7 +65,7 @@
             format="yyyy 年 MM 月 dd 日"
             value-format="yyyy-MM-dd"
             placeholder="日期"
-            v-model="formEdit.date"
+            v-model="formEdit.birthday"
             style="width: 100%;"
           ></el-date-picker>
         </el-form-item>
@@ -73,13 +73,13 @@
           <el-input v-model="formEdit.grade" placeholder="年级"></el-input>
         </el-form-item>
         <el-form-item label="学院">
-          <el-input v-model="formEdit.collage" placeholder="学院"></el-input>
+          <el-input v-model="formEdit.college" placeholder="学院"></el-input>
         </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
+        <el-button type="primary" @click="save()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -94,14 +94,14 @@
         class="demo-form-inline"
       >
         <el-form-item label="姓名">
-          <el-input v-model="formAdd.name" placeholder="姓名"></el-input>
+          <el-input v-model="formAdd.studentName" placeholder="姓名"></el-input>
         </el-form-item>
         <el-form-item label="学号">
-          <el-input v-model="formAdd.studentId" placeholder="学号"></el-input>
+          <el-input v-model="formAdd.studentNumber" placeholder="学号"></el-input>
         </el-form-item>
         <el-form-item label="性别">
-          <el-radio v-model="formAdd.gender" label="0">女</el-radio>
-          <el-radio v-model="formAdd.gender" label="1">男</el-radio>
+          <el-radio v-model="formAdd.sex" label="2">女</el-radio>
+          <el-radio v-model="formAdd.sex" label="1">男</el-radio>
         </el-form-item>
         <el-form-item label="出生日期">
           <el-date-picker
@@ -109,7 +109,7 @@
             format="yyyy 年 MM 月 dd 日"
             value-format="yyyy-MM-dd"
             placeholder="日期"
-            v-model="formAdd.date"
+            v-model="formAdd.birthday"
             style="width: 100%;"
           ></el-date-picker>
         </el-form-item>
@@ -117,13 +117,13 @@
           <el-input v-model="formAdd.grade" placeholder="年级"></el-input>
         </el-form-item>
         <el-form-item label="学院">
-          <el-input v-model="formAdd.collage" placeholder="学院"></el-input>
+          <el-input v-model="formAdd.college" placeholder="学院"></el-input>
         </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAddVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save(formAdd)">确 定</el-button>
+        <el-button type="primary" @click="save()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -141,6 +141,7 @@
 </style>
 
 <script>
+import * as studentApi from "../../apis/students.js";
 export default {
   name: "students",
   data() {
@@ -148,196 +149,105 @@ export default {
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
-        pageTotal: 16
+        pageTotal: 1
       },
-      tableData: [
-        {
-          studentId: "2015210912",
-          name: "周灰灰",
-          date: "2017-1-12",
-          gender: "0",
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210913",
-          name: "赵灰灰",
-          date: "2017-1-12",
-          gender: "0",
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210911",
-          name: "钱灰灰",
-          date: "2017-1-12",
-          gender: 1,
-          grade: "2016",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210914",
-          name: "孙灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2014",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210912",
-          name: "周灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210913",
-          name: "赵灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210911",
-          name: "钱灰灰",
-          date: "2017-1-12",
-          gender: 1,
-          grade: "2016",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210914",
-          name: "孙灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2014",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210912",
-          name: "周灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210913",
-          name: "赵灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210911",
-          name: "钱灰灰",
-          date: "2017-1-12",
-          gender: 1,
-          grade: "2016",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210914",
-          name: "孙灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2014",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210912",
-          name: "周灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210913",
-          name: "赵灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2015",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210911",
-          name: "钱灰灰",
-          date: "2017-1-12",
-          gender: 1,
-          grade: "2016",
-          collage: "计算机学院"
-        },
-        {
-          studentId: "2015210914",
-          name: "孙灰灰",
-          date: "2017-1-12",
-          gender: 0,
-          grade: "2014",
-          collage: "计算机学院"
-        }
-      ],
+      tableData: [],
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       form: {
-        studentId: "",
-        name: "",
-        gender: "",
+        studentNumber: "",
+        studentName: "",
+        sex: "",
         grade: "",
-        date: "",
-        collage: ""
+        birthday: "",
+        college: ""
       },
       dialogFormVisible: false,
       dialogAddVisible: false,
       formLabelWidth: "120px",
       formAdd: {
         //表单对象
-        studentId: "",
-        name: "",
-        gender: "",
+        studentNumber: "",
+        studentName: "",
+        sex: "",
         grade: "",
-        date: "",
-        collage: ""
+        birthday: "",
+        college: ""
       },
       formEdit: {
         //表单对象
-        studentId: "",
-        name: "",
-        gender: "",
+        studentNumber: "",
+        studentName: "",
+        sex: "",
         grade: "",
-        date: "",
-        collage: ""
+        birthday: "",
+        college: ""
       },
       multipleSelection: []
     };
   },
   methods: {
-    handleEdit(index, rowData) {
-      var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
-      this.$message({
-        message: msg,
-        type: "success"
-      });
+    timestampToTime(timestamp) {
+        var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        var Y = date.getFullYear() + '-';
+        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+        var D = date.getDate();
+        return Y+M+D;
+    },
+    handleEdit(rowData) {
       console.log(rowData);
       this.formEdit = rowData;
+      if(this.formEdit.sex == "BOY"){
+        this.formEdit.sex = "1"
+      }else{
+        this.formEdit.sex = "2"
+      }
       this.dialogFormVisible = true;
     },
-    handleDelete(index, rowData) {
-      var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
+    deleteRow(id) {
+      studentApi
+        .del(id)
+        .then(res => {
+          if (res.code == "140001") {
+            this.$message.success("删除成功！");
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    queryTable(index, size) {
+      studentApi
+        .query(index, size)
+        .then(res => {
+          console.log(res);
+          if (res.code == "140001") {
+            this.$message.success("请求成功");
+            for (let i = 0; i < res.result.results.length; i++) {
+              res.result.results[i].birthday = this.timestampToTime(res.result.results[i].birthday)     
+              console.log(res.result.results[i])
+            }
+            this.tableData = res.result.results;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    handleDelete(rowData) {
       this.$confirm("此操作将永久删除该文件, 是否继续?", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
       })
         .then(() => {
-          this.tableData.splice(index, 1);
-          this.$message({
-            type: "success",
-            message: "删除成功!" + msg
-          });
+          this.deleteRow(rowData.id);
         })
         .catch(() => {
           this.$message({
@@ -348,72 +258,63 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(val, this.pageInfo.pageSize);
     },
-    onSubmit() {
-      console.log("submit!");
-    },
+
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      this.$message({
-        message: "选中的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
     },
     deleteMany() {
-      var ids = this.multipleSelection.map(item => item.id).join();
-      this.$message({
-        message: "删除的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
+      var ids = this.multipleSelection.map(item => item.id);
+      for (let i = 0; i < ids.length; i++) {
+        this.deleteRow(ids[i]);
+      }
     },
-    save(param) {
-      //let param = Object.assign({}, this.formAdd);
-      let flag = true;
-      let flagstr = "";
-      Object.keys(param).forEach(function(key) {
-        if (!param[key]) {
-          flag = false;
-          flagstr += key + ",";
-        }
-      });
-      if (flag) {
-        if (!this.dialogFormVisible) {
-          this.tableData.push(param);
-          this.formAdd = {};
-          this.dialogAddVisible = false;
-        } else {
-          this.formEdit = param;
-          this.dialogFormVisible = false;
-        }
+    save() {
+      if (!this.dialogFormVisible) {
+        console.log(this.formAdd);
+        studentApi
+          .add(this.formAdd)
+          .then(res => {
+            console.log(this.formAdd);
+            if (res.code == "140001") {
+              this.$message.success("添加成功");
+              this.formAdd = {};
+              this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+            } else {
+              this.$message.error("error：" + res.message);
+            }
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
+        this.formAdd = {};
+        this.dialogAddVisible = false;
       } else {
-        let msg = "请输入" + flagstr;
-        this.$message({
-          message: msg,
-          type: "warning"
-        });
+        studentApi
+          .update(this.formEdit)
+          .then(res => {
+            console.log(res);
+            if (res.code == "140001") {
+              this.$message.success("保存成功");
+              this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+              this.dialogFormVisible = false;
+            } else {
+              this.$message.error("error" + res.message);
+            }
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
       }
     }
+  },
+  created() {
+    this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
   }
 };
 </script>

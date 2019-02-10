@@ -191,7 +191,7 @@ export default {
     };
   },
   methods: {
-    handleEdit(index, rowData) {
+    handleEdit(rowData) {
       // var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
       // this.$message({
       //   message: msg,
@@ -249,9 +249,11 @@ export default {
         });
     },
     handleSizeChange(val) {
+      this.pageInfo.pageSize = val;
       this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
+      this.pageInfo.pageIndex = val;
       this.queryTable(val, this.pageInfo.pageSize);
     },
     handleSelectionChange(val) {
@@ -293,6 +295,7 @@ export default {
             } else {
               this.$message.error("error" + res.message);
             }
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
           })
           .catch(error => {
             this.$message.error(error + "");

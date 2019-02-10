@@ -12,17 +12,17 @@
           :data="tableData"
           stripe
           style="width: 600px"
-          :default-sort="{prop: 'labId', order: 'descending'}"
+          :default-sort="{prop: 'classroomNumber', order: 'descending'}"
           @selection-change="handleSelectionChange"
         >
           <el-table-column type="selection" width="50"></el-table-column>
-          <el-table-column prop="labId" sortable label="编号" width="100"></el-table-column>
-          <el-table-column prop="name" label="名称" width="100"></el-table-column>
-          <el-table-column prop="holdPeople" label="容量" width="50"></el-table-column>
-          <el-table-column prop="state" label="当前状态" width="80"></el-table-column>
+          <el-table-column prop="classroomNumber" sortable label="编号" width="100"></el-table-column>
+          <el-table-column prop="classroomName" label="名称" width="100"></el-table-column>
+          <el-table-column prop="capacity" label="容量" width="50"></el-table-column>
+          <el-table-column prop="enabled" label="当前状态" width="80"></el-table-column>
           <el-table-column label="操作" fixed="right" min-width="120">
             <template slot-scope="scope">
-              <el-button size="mini" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+              <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
               <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
             </template>
           </el-table-column>
@@ -51,20 +51,20 @@
           :model="formAdd"
         >
           <el-form-item label="实验室编号">
-            <el-input v-model="formAdd.labId" placeholder="实验室编号"></el-input>
+            <el-input v-model="formAdd.classroomNumber" placeholder="实验室编号"></el-input>
           </el-form-item>
           <el-form-item label="实验室名称">
-            <el-input v-model="formAdd.name" placeholder="实验室名称"></el-input>
+            <el-input v-model="formAdd.classroomName" placeholder="实验室名称"></el-input>
           </el-form-item>
           <el-form-item label="可容纳人数">
-            <el-input v-model="formAdd.holdPeople" type="number" min="0" placeholder="可容纳人数"></el-input>
+            <el-input v-model="formAdd.capacity" type="number" min="0" placeholder="可容纳人数"></el-input>
           </el-form-item>
 
           <el-form-item label="是否可用">
-            <el-radio v-model="formAdd.state" label="0">否</el-radio>
-            <el-radio v-model="formAdd.state" label="1">是</el-radio>
+            <el-radio v-model="formAdd.enabled" label="2">否</el-radio>
+            <el-radio v-model="formAdd.enabled" label="1">是</el-radio>
           </el-form-item>
-          <a class="btn-add" type="primary" @click="save(formAdd)">确定添加</a>
+          <a class="btn-add" type="primary" @click="save()">确定添加</a>
         </el-form>
       </div>
     </div>
@@ -78,24 +78,24 @@
         class="demo-form-inline"
       >
         <el-form-item label="实验室编号">
-          <el-input v-model="formEdit.labId" placeholder="实验室编号"></el-input>
+          <el-input v-model="formEdit.classroomNumber" placeholder="实验室编号"></el-input>
         </el-form-item>
         <el-form-item label="实验室名称">
-          <el-input v-model="formEdit.name" placeholder="实验室名称"></el-input>
+          <el-input v-model="formEdit.classroomName" placeholder="实验室名称"></el-input>
         </el-form-item>
 
         <el-form-item label="可容纳人数">
-          <el-input v-model="formEdit.holdPeople" placeholder="可容纳人数"></el-input>
+          <el-input v-model="formEdit.capacity" placeholder="可容纳人数"></el-input>
         </el-form-item>
         <el-form-item label="是否可用">
-          <el-radio v-model="formEdit.state" label="0">否</el-radio>
-          <el-radio v-model="formEdit.state" label="1">是</el-radio>
+          <el-radio v-model="formEdit.enabled" label="2">否</el-radio>
+          <el-radio v-model="formEdit.enabled" label="1">是</el-radio>
         </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save(formEdit)">确 定</el-button>
+        <el-button type="primary" @click="save()">确 定</el-button>
       </div>
     </el-dialog>
 
@@ -141,21 +141,22 @@ h2 {
 </style>
 
 <script>
+import * as labsApi from '../../apis/labs.js'
 export default {
   name: "labs",
   data() {
     return {
       rules: {
-        labId: [
+        classroomNumber: [
           { required: true, messsage: "请输入实验室编号", trigger: "blur" }
         ],
-        name: [
+        classroomName: [
           { required: true, message: "请输入实验室名称", trigger: "blur" }
         ],
-        holdPeople: [
+        capacity: [
           { required: true, message: "请输入实验室容量", trigger: "blur" }
         ],
-        state: [
+        enabled: [
           {
             type: "boolen",
             required: true,
@@ -167,78 +168,77 @@ export default {
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
-        pageTotal: 16
+        pageTotal: 1
       },
-      tableData: [
-        {
-          labId: "9301",
-          name: "1号机房",
-          holdPeople: "50",
-          state: "1"
-        },
-        {
-          labId: "9301",
-          name: "1号机房",
-          holdPeople: "50",
-          state: "1"
-        },
-        {
-          labId: "9302",
-          name: "2号机房",
-          holdPeople: "50",
-          state: "1"
-        },
-        {
-          labId: "9303",
-          name: "3号机房",
-          holdPeople: "50",
-          state: "1"
-        },
-        {
-          labId: "9304",
-          name: "4号机房",
-          holdPeople: "50",
-          state: "1"
-        }
-      ],
+      tableData: [],
       labelPosition: "right", //lable对齐方式
       labelWidth: "100px", //lable宽度
       form: {
-        labId: "",
-        name: "",
-        holdPeople: "",
-        state: ""
+        classroomNumber: "",
+        classroomName: "",
+        capacity: "",
+        enabled: ""
       },
       dialogFormVisible: false,
       dialogAddVisible: false,
       formLabelWidth: "120px",
       formAdd: {
         //表单对象
-        labId: "",
-        name: "",
-        holdPeople: "",
-        state: ""
+        classroomNumber: "",
+        classroomName: "",
+        capacity: "",
+        enabled: ""
       },
       formEdit: {
         //表单对象
-        labId: "",
-        name: "",
-        holdPeople: "",
-        state: ""
+        classroomNumber: "",
+        classroomName: "",
+        capacity: "",
+        enabled: ""
       },
       multipleSelection: []
     };
   },
   methods: {
-    handleEdit(index, rowData) {
-      var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
-      this.$message({
-        message: msg,
-        type: "success"
-      });
-      console.log(rowData);
+    handleEdit(rowData) {
       this.formEdit = rowData;
+      if(this.formEdit.enabled == "NORMAL"){
+        this.formEdit.enabled = "1";
+      }else{
+        this.formEdit.enabled = "2";
+      }
       this.dialogFormVisible = true;
+    },
+    queryTable(index, size) {
+      labsApi
+        .query(index, size)
+        .then(res => {
+          if (res.code == "140001") {
+            this.$message.success("请求成功");
+            this.tableData = res.result.results;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    deleteRow(id) {
+      labsApi
+        .del(id)
+        .then(res => {
+          if (res.code == "140001") {
+            this.$message.success("删除成功");
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
     },
     handleDelete(index, rowData) {
       var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
@@ -248,11 +248,7 @@ export default {
         type: "warning"
       })
         .then(() => {
-          this.tableData.splice(index, 1);
-          this.$message({
-            type: "success",
-            message: "删除成功!" + msg
-          });
+          this.deleteRow(rowData.id);
         })
         .catch(() => {
           this.$message({
@@ -263,71 +259,60 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
-    },
-    onSubmit() {
-      console.log("submit!");
+      this.queryTable(val, this.pageInfo.pageSize);
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      this.$message({
-        message: "选中的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
     },
     deleteMany() {
-      var ids = this.multipleSelection.map(item => item.id).join();
-      this.$message({
-        message: "删除的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
+      var ids = this.multipleSelection.map(item => item.id);
+      for (let i = 0; i < ids.length; i++) {
+        this.deleteRow(ids[i])
+      }
     },
-    save(param) {
-      //let param = Object.assign({}, this.formAdd);
-      let flag = true;
-      let flagstr = "";
-      Object.keys(param).forEach(function(key) {
-        if (!param[key]) {
-          flag = false;
-          flagstr += key + ",";
-        }
-      });
-      if (flag) {
-        if (!this.dialogFormVisible) {
-          this.tableData.push(param);
-          this.formAdd = {};
-        } else {
-          this.formEdit = param;
-          this.dialogFormVisible = false;
-        }
+    save() {
+      if (!this.dialogFormVisible) {
+        console.log(this.formAdd);
+        console.log(JSON.stringify(this.formAdd));
+        //var abc = labsApi.add(JSON.stringify(this.formAdd));
+        labsApi
+          .add(this.formAdd)
+          .then(res => {
+            if (res.code == "140001") {
+              this.$message.success("添加成功");
+              this.formAdd = {};
+              this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+            } else {
+              this.$message.error("error：" + res.message);
+            }
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
       } else {
-        let msg = "请输入" + flagstr;
-        this.$message({
-          message: msg,
-          type: "warning"
-        });
+        labsApi
+          .update(this.formEdit)
+          .then(res => {
+            if (res.code == "140001") {
+              this.$message.success("保存成功");
+              this.dialogFormVisible = false;
+            } else {
+              this.$message.error("error" + res.message);
+            }
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+          })
+          .catch(error => {
+            this.$message.error(error + "");
+          });
       }
     }
+  },
+  created() {
+    this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
   }
 };
 </script>
