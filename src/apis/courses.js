@@ -1,23 +1,18 @@
 import http from './httpServer'
 let apiUrl = "http://alish1.iyuhui.cn:8089/course"
-
+//let apiUrl = "/api"
 //定义方法，准备请求服务端的页面查询接口
 export const query = (page, size) => {
   // var queryVo = {"courseNumber": params.courseNumber};
   // if (params.courseName != "") {
   //   queryVo.courseName = params.courseName;
   // }
-  return http.requestPost(apiUrl + "/query/" + page + "/" + size);
+  return http.requestQuickGet(apiUrl + "/query/page/" + page + "/" + size);
 }
 
 export const add = (courseObj) => {
-    return http.requestPostForm(apiUrl + "/add", courseObj)
+  return http.requestPost(apiUrl + "/add", courseObj)
 }
-
-// //更新授权url
-// export const updateOssUrl = (audioId) => {
-//   return http.requestQuickGet(apiUrl + "/update-ossurl/" + audioId);
-// }
 
 export const update = (courseObj) => {
   return http.requestPost(apiUrl + "/update", courseObj)

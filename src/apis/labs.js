@@ -1,31 +1,25 @@
-import http from 'httpServer'
-let apiUrl = "http://alish1.iyuhui.cn:8089/swagger-ui.html#/"
-
-//定义方法，准备请求服务端的页面查询接口
-export const query = (page, size, params) => {
-  var queryVo = {"categoryId": params.categoryId};
-  if (params.audioName != "") {
-    queryVo.audioName = params.audioName;
-  }
-  return http.requestPost(apiUrl + "/query/" + page + "/" + size, queryVo);
+import http from './httpServer'
+let apiUrl = "http://alish1.iyuhui.cn:8089/course"
+ 
+export const query = (page, size) => {
+  return http.requestQuickGet(apiUrl + "/query/page/" + page + "/" + size);
 }
 
-//更新授权url
-export const updateOssUrl = (audioId) => {
-  return http.requestQuickGet(apiUrl + "/update-ossurl/" + audioId);
+export const add = (labObj) => {
+  return http.requestPost(apiUrl + "/add", labObj)
 }
 
-export const updateName = (audio) => {
-  return http.requestPost(apiUrl + "/update", audio)
+export const update = (labObj) => {
+  return http.requestPost(apiUrl + "/update", labObj)
 }
 
 
-//批量添加-通过文件批量上传
-export const addUpload = (params) => {
-  return http.requestPost(apiUrl + "/add-upload", params);
-}
+// //批量添加-通过文件批量上传
+// export const addUpload = (params) => {
+//   return http.requestPost(apiUrl + "/add-upload", params);
+// }
 
 //删除
-export const del = (audioId) => {
-  return http.requestDelete(apiUrl + "/delete/" + audioId);
+export const del = (labNumber) => {
+  return http.requestDelete(apiUrl + "/delete/" + labNumber);
 }

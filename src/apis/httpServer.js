@@ -1,9 +1,8 @@
 require('es6-promise').polyfill()
 import axios from 'axios'
 
-axios.defaults.withCredentials=true //跨域
-axios.defaults.timeout=1000000
-axios.defaults.headers.post['Content-Type'] = 'aplication/x-www=form-urlencoded'
+axios.defaults.withCredentials = true //跨域
+axios.defaults.timeout = 1000000
 
 export default {
   //get请求
@@ -38,22 +37,22 @@ export default {
   },
 
   //post请求
-  requestPostForm(url, params = {}) {
-    return new Promise( (resolve, reject) => {
-      axios.post(url, params, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        }
-      }).then(res => {
-        resolve(res.data) //注意，res是axios封装的对象，res.data才是服务端返回的信息
-      }).catch(error => {
-        reject(error)
-      })
-    })
-  },
+  // requestPostForm(url, params = {}) {
+  //   return new Promise((resolve, reject) => {
+  //     axios.post(url, params, {
+  //       headers: {
+  //         'Content-Type': 'application/x-www-form-urlencoded'
+  //       }
+  //     }).then(res => {
+  //       resolve(res.data) //注意，res是axios封装的对象，res.data才是服务端返回的信息
+  //     }).catch(error => {
+  //       reject(error)
+  //     })
+  //   })
+  // },
 
   //put请求
-  requestPut (url, params = {}) {
+  requestPut(url, params = {}) {
     return new Promise((resolve, reject) => {
       axios.put(url, params).then(res => {
         resolve(res.data)
@@ -64,7 +63,7 @@ export default {
   },
 
   //delete请求
-  requestDelete (url, params = {}) {
+  requestDelete(url, params = {}) {
     return new Promise((resolve, reject) => {
       axios.delete(url, params).then(res => {
         resolve(res.data)
@@ -73,7 +72,4 @@ export default {
       })
     })
   }
-
-  //delete请求
-
 }

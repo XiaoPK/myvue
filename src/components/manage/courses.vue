@@ -63,7 +63,7 @@
             <el-input type="textarea" v-model="formAdd.courseDesc" placeholder="课程简介"></el-input>
           </el-form-item>
 
-          <a class="btn-add" type="primary" @click="save(formAdd)">确定添加</a>
+          <a class="btn-add" type="primary" @click="save()">确定添加</a>
         </el-form>
       </div>
     </div>
@@ -146,8 +146,8 @@ export default {
     return {
       pageInfo: {
         pageIndex: 1,
-        pageSize: 5,
-        pageTotal: 16
+        pageSize: 10,
+        pageTotal: 1
       },
       tableData: [],
       labelPosition: "right", //lable对齐方式
@@ -192,14 +192,30 @@ export default {
   },
   methods: {
     handleEdit(index, rowData) {
-      var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
-      this.$message({
-        message: msg,
-        type: "success"
-      });
-      console.log(rowData);
+      // var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
+      // this.$message({
+      //   message: msg,
+      //   type: "success"
+      // });
+      // console.log(rowData);
       this.formEdit = rowData;
       this.dialogFormVisible = true;
+    },
+
+    deleteRow(id) {
+      courseApi
+        .del(id)
+        .then(res => {
+          if (res.code == "140001") {
+            this.$message.success("删除成功");
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
     },
     handleDelete(index, rowData) {
       var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
@@ -209,105 +225,58 @@ export default {
         type: "warning"
       })
         .then(() => {
-          courseApi.del(rowData.courseNumber);
-          console.log(index + "---" + rowData.courseNumber);
-          this.$message({
-            type: "success",
-            message: "删除成功!" + msg
-          });
+          this.deleteRow(rowData.id);
         })
         .catch(() => {
-          this.$message({
-            type: "info",
-            message: "已取消删除"
-          });
+          this.$message.info("已取消删除");
+        });
+    },
+
+    queryTable(index, size) {
+      courseApi
+        .query(index, size)
+        .then(res => {
+          if (res.code == "140001") {
+            this.$message.success("请求成功");
+            this.tableData = res.result.results;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
         });
     },
     handleSizeChange(val) {
-      this.pageInfo.pageSize = val;
-      courseApi
-        .query(this.pageInfo.pageIndex, this.pageInfo.pageSize)
-        .then(res => {
-          if (res.message == "success") {
-            this.$message.success("请求成功");
-          } else {
-            this.$message.error("请求失败，错误描述为：" + res.message);
-          }
-        })
-        .catch(error => {
-          this.$message.error(error + "");
-        });
-
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
-      this.pageInfo.pageIndex = val;
-      courseApi
-        .query(this.pageInfo.pageIndex, this.pageInfo.pageSize)
-        .then(res => {
-          if (res.message == "success") {
-            this.$message.success("请求成功");
-          } else {
-            this.$message.error("请求失败，错误描述为：" + res.message);
-          }
-        })
-        .catch(error => {
-          this.$message.error(error + "");
-        });
-
-      this.$message({
-        message:
-          "第" +
-          this.pageInfo.pageIndex +
-          "页，" +
-          "size:" +
-          this.pageInfo.pageSize,
-        type: "success"
-      });
+      this.queryTable(val, this.pageInfo.pageSize);
     },
     handleSelectionChange(val) {
       this.multipleSelection = val;
-      this.$message({
-        message: "选中的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
     },
     deleteMany() {
-      var ids = this.multipleSelection.map(item => item.id).join();
-      this.$message({
-        message: "删除的项是:" + JSON.stringify(this.multipleSelection),
-        type: "success"
-      });
-    },
-    save(param) {
-      //let param = Object.assign({}, this.formAdd);
-      let flag = false;
-      Object.keys(param).forEach(function(key) {
-        if (!param[key]) {
-          flag = true;
-        }
-      });
-      if (flag) {
-        this.$message.error("请将课程信息填写完整！");
-        return;
+      var ids = this.multipleSelection.map(item => item.id);
+      for (let i = 0; i < ids.length; i++) {
+        this.deleteRow(ids[i])
       }
+    },
+    save() {
       if (!this.dialogFormVisible) {
+        console.log(this.formAdd);
+        console.log(JSON.stringify(this.formAdd));
+        //var abc = courseApi.add(JSON.stringify(this.formAdd));
         courseApi
           .add(this.formAdd)
           .then(res => {
-            if (res.message == "success") {
+            if (res.code == "140001") {
               this.$message.success("添加成功");
               this.formAdd = {};
+              this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
             } else {
-              this.$message.error("添加失败，错误描述为：" + res.message);
+              this.$message.error("error：" + res.message);
             }
           })
           .catch(error => {
@@ -315,13 +284,14 @@ export default {
           });
       } else {
         courseApi
-          .update(param)
+          .update(this.formEdit)
           .then(res => {
-            if (res.message == "success") {
-              this.$message.success("添加成功");
+            console.log(res);
+            if (res.code == "140001") {
+              this.$message.success("保存成功");
               this.dialogFormVisible = false;
             } else {
-              this.$message.error("添加失败，错误描述为：" + res.message);
+              this.$message.error("error" + res.message);
             }
           })
           .catch(error => {
@@ -329,6 +299,9 @@ export default {
           });
       }
     }
+  },
+  created() {
+    this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
   }
 };
 </script>
