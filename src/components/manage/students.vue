@@ -1,9 +1,11 @@
 <template>
   <div>
     <!-- 操作区----start -->
-    <el-row class="right">
-      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加学生</el-button>
+    <el-row>
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加学生</el-button>  
+      <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
+      <el-button size="medium" type="primary">导出数据</el-button>
     </el-row>
     <br>
     <!-- 操作区----end -->
@@ -126,14 +128,48 @@
         <el-button type="primary" @click="save()">确 定</el-button>
       </div>
     </el-dialog>
-
     <!-- 新增弹框---end -->
+    <!-- 上传数据开始 -->
+    <el-dialog title="导入数据" :visible.sync="dialogUploadVisible" width="400px">
+      <a href="http://alish1.iyuhui.cn:8089/student/query/import-template">不知道格式?先下载模板</a>
+      <br>
+      <br>
+      <el-upload
+        class="upload"
+        action="http://alish1.iyuhui.cn:8089/student/add/import/validate"
+        :on-preview="handlePreview"
+        :on-remove="handleRemove"
+        :limit="1"
+        :file-list="fileList"
+        :on-success="handleSuccess"
+        :on-error="handleError"
+        accept="xls"
+      >
+        <el-button slot="trigger" size="medium" type="primary">选择文件</el-button>
+        <el-button
+          style="margin-left: 10px;"
+          size="medium"
+          type="success"
+          @click="submitUpload()"
+        >缓存文件</el-button>
+        <div v-if="tip" style="color='blue'">{{ tip }}</div>
+        <div class="error" v-if="errorTip!=''">{{ errorTip }}</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogUploadVisible = false">取 消</el-button>
+        <el-button type="primary" @click="importCache()" :disabled="disabled">保 存</el-button>
+      </div>
+    </el-dialog>
+    <!-- 上传数据结束 -->
   </div>
 </template>
 
 <style>
 .el-form-item__content {
   width: 220px;
+}
+.error {
+  color: red;
 }
 .right {
   float: right;
@@ -146,12 +182,15 @@ export default {
   name: "students",
   data() {
     return {
+      fileList:[],
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
         pageTotal: 1
       },
+      disabled:"",
       tableData: [],
+      tableDataCache:[],
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       form: {
@@ -162,6 +201,9 @@ export default {
         birthday: "",
         college: ""
       },
+      tip: "",
+      errorTip: "",
+      dialogUploadVisible: false,
       dialogFormVisible: false,
       dialogAddVisible: false,
       formLabelWidth: "120px",
@@ -187,6 +229,107 @@ export default {
     };
   },
   methods: {
+    cleanCache(){
+      this.tip = '';
+      this.errorTip = ''
+      this.tableDataCache = []
+      this.fileList =[];
+      this.dialogUploadVisible = true
+    },
+    submitUpload() {
+      studentApi
+        .queryCache()
+        .then(res => {
+          if (res.result.cached) {
+            this.tip = "文件缓存成功,请及时保存!";
+            this.disabled = false
+          } else {
+            this.$message.error("请求失败,请稍后重试!" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    importCache() {
+      studentApi
+        .uploadCache()
+        .then(res => {
+          console.log(res);
+          if (res.code == "140001") {
+            this.$message.success("保存成功!");
+            this.queryTable(this.pageInfo.pageIndex,this.pageInfo.pageSize)
+          } else {
+            this.$message.error("保存失败:" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error);
+        });
+      this.dialogUploadVisible = false;
+    },
+
+    handlePreview(file) {
+      console.log(file);
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    getErrors(param){
+      for (let i = 0; i < param.length; i++) {
+        if(param[i].isError != ''){
+          console.log(param[i].isError)
+          this.errorTip += "学号"+param[i].studentNumber + '发生错误：' + param[i].isError + "'\'n"
+        }
+      }
+      console.log(this.errorTip)
+    },
+    handleSuccess(res) {
+      console.log("文件上传成功");
+      console.log(res.result.rows);
+      console.log(res.result.rows[0]);
+      let abc = res.result.rows;
+      //总数据
+      for (let i = 0; i < abc.length; i++) {
+        let teacherObj = {};
+        teacherObj.isError='';
+        //每一行有七个格子
+        for (let item in abc[i].cells) {   
+          console.log(abc[i].cells[item].errorMessage);
+          if (abc[i].cells[item].errorMessage != "") {
+            teacherObj.isError += "【"+abc[i].cells[item].fieldName + ":"+abc[i].cells[item].errorMessage + "】";
+          }
+          if (abc[i].cells[item].fieldName == "学号") {
+            teacherObj.studentNumber = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "学生姓名") {
+            teacherObj.studentName = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "性别") {
+            teacherObj.sex = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "出生日期") {
+            teacherObj.birthday = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "年级") {
+            teacherObj.grade = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "所在学院") {
+            teacherObj.college = abc[i].cells[item].value;
+          }
+        }
+        console.log(teacherObj);
+        this.tableDataCache.push(teacherObj);
+        console.log("列表————————");
+        console.log(this.tableData)
+        console.log(this.tableDataCache);
+      }
+      //this.tableData = this.tableData.concat(this.tableDataCache)
+      this.getErrors(this.tableDataCache)
+    },
+    handleError(res) {
+      this.$message.error("error:" + res.message);
+    },
     timestampToTime(timestamp) {
         var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
         var Y = date.getFullYear() + '-';

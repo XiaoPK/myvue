@@ -23,3 +23,15 @@ export const update = (teacherObj) => {
 export const del = (teacherNumber) => {
   return http.requestDelete(apiUrl + "/delete/" + teacherNumber);
 }
+
+//导入接口
+export const uploadFile = (file) => {
+  return http.requestPost(apiUrl + "/add/import/validate",file)
+}
+
+export const queryCache = () => {
+  return http.requestQuickGet(apiUrl + "/query/import/cache")
+}
+export const uploadCache = () => {
+  return http.requestPut(apiUrl + "/add/import/save")
+}

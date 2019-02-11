@@ -3,10 +3,13 @@
     <!-- 操作区----start -->
     <el-row>
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
+      <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
+      <el-button size="medium" type="primary">导出数据</el-button>
     </el-row>
     <br>
     <div>
       <div class="tabwidth">
+       
         <!-- 表格---start -->
         <el-table
           :data="tableData"
@@ -98,6 +101,38 @@
     </el-dialog>
 
     <!-- 编辑弹框---end -->
+    <!-- 上传数据开始 -->
+    <el-dialog title="导入数据" :visible.sync="dialogUploadVisible" width="400px">
+      <a href="http://alish1.iyuhui.cn:8089/course/query/import-template">不知道格式?先下载模板</a>
+      <br>
+      <br>
+      <el-upload
+        class="upload"
+        action="http://alish1.iyuhui.cn:8089/course/add/import/validate"
+        :on-preview="handlePreview"
+        :on-remove="handleRemove"
+        :limit="1"
+        :file-list="fileList"
+        :on-success="handleSuccess"
+        :on-error="handleError"
+        accept="xls"
+      >
+        <el-button slot="trigger" size="medium" type="primary">选择文件</el-button>
+        <el-button
+          style="margin-left: 10px;"
+          size="medium"
+          type="success"
+          @click="submitUpload()"
+        >缓存文件</el-button>
+        <div v-if="tip">{{ tip }}</div>
+        <div class="error" v-if="errorTip!=''">{{ errorTip }}</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogUploadVisible = false">取 消</el-button>
+        <el-button type="primary" @click="importCache()" :disabled="disabled">保 存</el-button>
+      </div>
+    </el-dialog>
+    <!-- 上传数据结束 -->
   </div>
 </template>
 
@@ -106,6 +141,9 @@ h2 {
   text-align: center;
   font-weight: normal;
   margin-bottom: 15px;
+}
+.error {
+  color: red;
 }
 .el-form-item__content {
   width: 220px;
@@ -144,12 +182,15 @@ export default {
   courseName: "courses",
   data() {
     return {
+      fileList:[],
       pageInfo: {
         pageIndex: 1,
         pageSize: 10,
         pageTotal: 1
       },
+      disabled:"",
       tableData: [],
+      tableDataCache:[],
       labelPosition: "right", //lable对齐方式
       labelWidth: "100px", //lable宽度
       form: {
@@ -158,6 +199,9 @@ export default {
         period: "",
         courseDesc: ""
       },
+      tip: "",
+      errorTip: "",
+      dialogUploadVisible: false,
       dialogFormVisible: false,
       dialogAddVisible: false,
       formLabelWidth: "120px",
@@ -191,13 +235,113 @@ export default {
     };
   },
   methods: {
+    cleanCache(){
+      this.tip = '';
+      this.errorTip = ''
+      this.tableDataCache = []
+      this.fileList =[];
+      this.dialogUploadVisible = true
+    },
+    submitUpload() {
+      courseApi
+        .queryCache()
+        .then(res => {
+          if (res.result.cached) {
+            this.tip = "文件缓存成功,请及时保存!";
+            this.disabled = false
+          } else {
+            this.$message.error("缓存失败,请按照报错信息修改后重新上传！" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    importCache() {
+      courseApi
+        .uploadCache()
+        .then(res => {
+          console.log(res);
+          if (res.code == "140001") {
+            this.$message.success("保存成功!");
+            this.queryTable(this.pageInfo.pageIndex,this.pageInfo.pageSize)
+          } else {
+            this.$message.error("保存失败:" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error);
+        });
+      this.dialogUploadVisible = false;
+    },
+
+    handlePreview(file) {
+      console.log(file);
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    getErrors(param) {
+      for (let i = 0; i < param.length; i++) {
+        if (param[i].isError != "") {
+          console.log(param[i].isError);
+          this.errorTip +=
+            "课程编号" +
+            param[i].classroomNumber +
+            "发生错误：" +
+            param[i].isError +
+            "'\'";
+        }
+      }
+      console.log(this.errorTip);
+    },
+    handleSuccess(res) {
+      console.log("文件上传成功");
+      console.log(res.result.rows);
+      console.log(res.result.rows[0]);
+      let abc = res.result.rows;
+      //总数据
+      for (let i = 0; i < abc.length; i++) {
+        let labObj = {};
+        labObj.isError = "";
+        //每一行有七个格子
+        for (let item in abc[i].cells) {
+          console.log(abc[i].cells[item].errorMessage);
+          if (abc[i].cells[item].errorMessage != "") {
+            labObj.isError +=
+              "【" +
+              abc[i].cells[item].fieldName +
+              ":" +
+              abc[i].cells[item].errorMessage +
+              "】";
+          }
+          if (abc[i].cells[item].fieldName == "课程编号") {
+            labObj.courseNumber = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "课程名称") {
+            labObj.courseName = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "课时量") {
+            labObj.period = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "课程简介") {
+            labObj.courseDesc = abc[i].cells[item].value;
+          }
+        }
+        console.log(labObj);
+        this.tableDataCache.push(labObj);
+        console.log("列表————————");
+        console.log(this.tableData);
+        console.log(this.tableDataCache);
+      }
+      //this.tableData = this.tableData.concat(this.tableDataCache);
+      this.getErrors(this.tableDataCache);
+    },
+    handleError(res) {
+      this.$message.error("error:" + res.message);
+    },
+
     handleEdit(rowData) {
-      // var msg = "索引是:" + index + ",行内容是:" + JSON.stringify(rowData);
-      // this.$message({
-      //   message: msg,
-      //   type: "success"
-      // });
-      // console.log(rowData);
       this.formEdit = rowData;
       this.dialogFormVisible = true;
     },
@@ -262,7 +406,7 @@ export default {
     deleteMany() {
       var ids = this.multipleSelection.map(item => item.id);
       for (let i = 0; i < ids.length; i++) {
-        this.deleteRow(ids[i])
+        this.deleteRow(ids[i]);
       }
     },
     save() {

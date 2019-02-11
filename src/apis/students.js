@@ -23,3 +23,17 @@ export const update = (studentObj) => {
 export const del = (studentNumber) => {
   return http.requestDelete(apiUrl + "/delete/" + studentNumber);
 }
+
+// export const download = () => {
+//     return http.requestGet(apiUrl + "/import-template")
+// }
+export const uploadFile = (file) => {
+  return http.requestPost(apiUrl + "/add/import/validate",file)
+}
+
+export const queryCache = () => {
+  return http.requestQuickGet(apiUrl + "/query/import/cache")
+}
+export const uploadCache = () => {
+  return http.requestPut(apiUrl + "/add/import/save")
+}

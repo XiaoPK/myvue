@@ -1,34 +1,37 @@
 <template>
   <div>
     <!-- 操作区----start -->
-    <el-row class="right">
-      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加教师</el-button>
+    <el-row >
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加教师</el-button>
+      <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
+      <el-button size="medium" type="primary">导出数据</el-button>
     </el-row>
     <br>
     <!-- 操作区----end -->
     <!-- 表格---start -->
+   
     <el-table
       :data="tableData"
       stripe
       style="width: 100%"
-      :default-sort="{prop: 'studentId', order: 'descending'}"
+      :default-sort="{prop: 'teacherNumber', order: 'descending'}"
       @selection-change="handleSelectionChange"
     >
-      <el-table-column type="selection" width="50"></el-table-column>
-      <el-table-column prop="teacherNumber" sortable label="职工编号" width="130"></el-table-column>
-      <el-table-column prop="teacherName" sortable label="姓名" width="100"></el-table-column>
-      <el-table-column prop="sex" label="性别" width="60"></el-table-column>
-      <el-table-column prop="teachCourses" label="教授课程" width="150"></el-table-column>
-      <el-table-column prop="office" label="办公室" width="120"></el-table-column>
-      <el-table-column prop="email" label="邮箱" width="160"></el-table-column>
-      <el-table-column prop="phone" label="电话" width="120"></el-table-column>
-      <el-table-column label="操作" fixed="right">
-        <template slot-scope="scope">
-          <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-          <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
-        </template>
-      </el-table-column>
+        <el-table-column type="selection" width="50"></el-table-column>
+        <el-table-column prop="teacherNumber" sortable label="教师编号" width="130"></el-table-column>
+        <el-table-column prop="teacherName" sortable label="教师姓名" width="100"></el-table-column>
+        <el-table-column prop="sex" label="性别" width="60"></el-table-column>
+        <el-table-column prop="teachCourses" label="可授课程" width="150"></el-table-column>
+        <el-table-column prop="office" label="办公室" width="120"></el-table-column>
+        <el-table-column prop="email" label="邮箱" width="160"></el-table-column>
+        <el-table-column prop="phone" label="电话" width="120"></el-table-column>
+        <el-table-column label="操作" fixed="right">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+          </template>
+        </el-table-column>   
     </el-table>
     <el-pagination
       background
@@ -71,14 +74,17 @@
           <el-input v-model="formEdit.phone" placeholder="电话"></el-input>
         </el-form-item>
         <el-form-item label="教授课程" prop="type">
-          <el-checkbox-group v-model="formEdit.teachCourses" size="medium">
+          <el-checkbox-group
+            v-model="formEdit.teachCourses"
+            size="medium"
+            @change="handleCheckedCitiesChange"
+          >
             <el-checkbox
-              v-for="city in cities"
-              :label="city"
-              :key="city"
+              v-for="course in courses"
+              :label="course.courseName"
+              :key="course.courseName"
               border
-              @change="handleCheckedCitiesChange"
-            >{{city}}</el-checkbox>
+            >{{course.courseName}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
@@ -120,29 +126,72 @@
           <el-input v-model="formAdd.phone" placeholder="电话"></el-input>
         </el-form-item>
         <el-form-item label="教授课程" prop="type">
-          <el-checkbox-group v-model="formAdd.teachCourses" size="medium">
+          <el-checkbox-group
+            v-model="formAdd.teachCourses"
+            size="medium"
+            @change="handleCheckedCitiesChange"
+          >
             <el-checkbox
-              v-for="city in cities"
-              :label="city"
-              :key="city"
+              v-for="course in courses"
+              :label="course.courseName"
+              :key="course.courseName"
               border
-              @change="handleCheckedCitiesChange"
-            >{{city}}</el-checkbox>
+            >{{course.courseName}}</el-checkbox>
           </el-checkbox-group>
         </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogAddVisible = false">取 消</el-button>
-        <el-button type="primary" @click="save(formAdd)">确 定</el-button>
+        <el-button type="primary" @click="save()">确 定</el-button>
       </div>
     </el-dialog>
-
     <!-- 新增弹框---end -->
+    <!-- 上传数据开始 -->
+    <el-dialog title="导入数据" :visible.sync="dialogUploadVisible" width="400px">
+      <a href="http://alish1.iyuhui.cn:8089/teacher/query/import-template">不知道格式?先下载模板</a>
+      <br>
+      <br>
+      <el-upload
+        class="upload"
+        action="http://alish1.iyuhui.cn:8089/teacher/add/import/validate"
+        :on-preview="handlePreview"
+        :on-remove="handleRemove"
+        :limit="1"
+        :on-success="handleSuccess"
+        :on-error="handleError"
+        accept="xls"
+        :file-list="fileList"
+      >
+        <el-button slot="trigger" size="medium" type="primary">选择文件</el-button>
+        <el-button
+          style="margin-left: 10px;"
+          size="medium"
+          type="success"
+          @click="submitUpload()"
+        >缓存文件</el-button>
+        <div v-if="tip" style="color='blue'">{{ tip }}</div>
+         <div class="error" v-if="errorTip!=''">{{ errorTip }}</div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogUploadVisible = false">取 消</el-button>
+        <el-button type="primary" @click="importCache()" :disabled="disabled">保 存</el-button>
+      </div>
+    </el-dialog>
+    <!-- 上传数据结束 -->
   </div>
 </template>
 
 <style>
+.upload {
+  text-align: center;
+}
+ .top {
+      text-align: center;
+    }
+.error {
+  color: red;
+}
 .el-form-item__content {
   width: 220px;
 }
@@ -152,20 +201,23 @@
 </style>
 
 <script>
-import * as teacherApi from '../../apis/teachers.js'
-import * as courseApi from '../../apis/courses.js'
-const cityOptions = ["上海", "北京", "广州", "深圳"];
+import * as teacherApi from "../../apis/teachers.js";
+import * as courseApi from "../../apis/courses.js";
+//const cityOptions = ["上海", "北京", "广州", "深圳"];
 export default {
   name: "teachers",
   data() {
     return {
-      cities: cityOptions,
+      fileList:[],
+      courses: {},
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
         pageTotal: 16
       },
+      tableDataCache:[],
       tableData: [],
+      disabled:"",
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       form: {
@@ -177,6 +229,9 @@ export default {
         teachCourses: [],
         phone: ""
       },
+      tip: "",
+      errorTip:"",
+      dialogUploadVisible: false,
       dialogFormVisible: false,
       dialogAddVisible: false,
       formLabelWidth: "120px",
@@ -204,23 +259,144 @@ export default {
     };
   },
   methods: {
-    getCourses(){
-      courseApi.query(1,6)
+    //导入模块
+    cleanCache(){
+      this.tip = '';
+      this.errorTip = ''
+      this.tableDataCache = []
+      this.fileList =[];
+      this.dialogUploadVisible = true
+    },
+    submitUpload() {
+      teacherApi
+        .queryCache()
+        .then(res => {
+          if (res.result.cached) {
+            this.tip = "文件缓存成功,请及时保存!";
+            this.disabled = false
+          } else {
+            this.$message.error("缓存失败,请按照报错信息修改后重新上传！" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
+    },
+    importCache() {
+      teacherApi
+        .uploadCache()
+        .then(res => {
+          console.log(res);
+          if (res.code == "140001") {
+            this.$message.success("保存成功!");
+            this.queryTable(this.pageInfo.pageIndex,this.pageInfo.pageSize)
+          } else {
+            this.$message.error("保存失败:" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error);
+        });
+      this.dialogUploadVisible = false;
+    },
+
+    handlePreview(file) {
+      console.log(file);
+    },
+    handleRemove(file, fileList) {
+      console.log(file, fileList);
+    },
+    getErrors(param){
+      for (let i = 0; i < param.length; i++) {
+        if(param[i].isError != ''){
+          console.log(param[i].isError)
+          this.errorTip += "教师编号"+param[i].teacherNumber + '发生错误：' + param[i].isError + "'\'"
+        }
+      }
+      console.log(this.errorTip) 
+    },
+    handleSuccess(res) {
+      console.log("文件上传成功");
+      console.log(res.result.rows);
+      console.log(res.result.rows[0]);
+      let abc = res.result.rows;
+      //总数据
+      for (let i = 0; i < abc.length; i++) {
+        let teacherObj = {};
+        teacherObj.isError='';
+        //每一行有七个格子
+        for (let item in abc[i].cells) {   
+          console.log(abc[i].cells[item].errorMessage);
+          if (abc[i].cells[item].errorMessage != "") {
+            teacherObj.isError += "【"+abc[i].cells[item].fieldName + ":"+abc[i].cells[item].errorMessage + "】";
+          }
+          if (abc[i].cells[item].fieldName == "教师编号") {
+            teacherObj.teacherNumber = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "教师姓名") {
+            teacherObj.teacherName = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "性别") {
+            teacherObj.sex = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "邮箱") {
+            teacherObj.email = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "手机号码") {
+            teacherObj.phone = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "办公室") {
+            teacherObj.office = abc[i].cells[item].value;
+          }
+          if (abc[i].cells[item].fieldName == "可授课程") {
+            teacherObj.teachCourses = abc[i].cells[item].value.split(",");
+          }
+        }
+        console.log(teacherObj);
+        this.tableDataCache.push(teacherObj);
+        console.log("列表————————");
+        console.log(this.tableData)
+        console.log(this.tableDataCache);
+      }
+      this.getErrors(this.tableDataCache)
+    },
+    handleError(res) {
+      this.$message.error("error:" + res.message);
+    },
+
+    //得到课程
+    getCourses() {
+      courseApi
+        .query(1, 10000)
+        .then(res => {
+          console.log(res);
+          if (res.code == "140001") {
+            this.$message.success("请求成功");
+            this.courses = res.result.results;
+            console.log(this.courses);
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("请求失败，错误描述为：" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error(error + "");
+        });
     },
     handleCheckedCitiesChange(value) {
       let checkedCount = value.length;
       console.log("点击");
-      this.checkAll = checkedCount === this.cities.length;
+      this.checkAll = checkedCount === this.courses.length;
       this.isIndeterminate =
-        checkedCount > 0 && checkedCount < this.cities.length;
+        checkedCount > 0 && checkedCount < this.courses.length;
     },
     handleEdit(rowData) {
       console.log(rowData);
       this.formEdit = rowData;
-      if(this.formEdit.sex == "BOY"){
-        this.formEdit.sex = "1"
-      }else{
-        this.formEdit.sex = "2"
+      if (this.formEdit.sex == "BOY") {
+        this.formEdit.sex = "1";
+      } else {
+        this.formEdit.sex = "2";
       }
       this.dialogFormVisible = true;
     },
@@ -245,7 +421,6 @@ export default {
         .then(res => {
           console.log(res);
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.tableData = res.result.results;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
@@ -331,6 +506,7 @@ export default {
   },
   created() {
     this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
+    this.getCourses();
   }
 };
 </script>

@@ -23,3 +23,16 @@ export const update = (labObj) => {
 export const del = (labNumber) => {
   return http.requestDelete(apiUrl + "/delete/" + labNumber);
 }
+
+// export const download = () => {
+//   return http.requestQuickGet(apiUrl + "/query/import-template")
+// }
+export const uploadFile = (file) => {
+  return http.requestPost(apiUrl + "/add/import/validate",file)
+}
+export const queryCache = () => {
+  return http.requestQuickGet(apiUrl + "/query/import/cache")
+}
+export const uploadCache = () => {
+  return http.requestPut(apiUrl + "/add/import/save")
+}
