@@ -47,6 +47,14 @@
                              {
                                 index: 'teachers',
                                 title: '教师管理'
+                            },
+                            {
+                                index: 'term',
+                                title: '学期管理'
+                            },
+                            {
+                                index: 'studentCourse',
+                                title: '学生选课表'
                             }
                         ]
                     },

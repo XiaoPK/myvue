@@ -46,11 +46,19 @@ export default new Router({
           }
         },
         {
-          path: '/assignrules',
-          name: 'test',
-          component: resolve => require(['../components/manage/test.vue'],resolve),
+          path: '/term',
+          name: 'term',
+          component: resolve => require(['../components/manage/term.vue'],resolve),
           meta:{
-            title:'分配规则'
+            title:'学期管理'
+          }
+        },
+        {
+          path: '/studentCourse',
+          name: 'studentCourse',
+          component: resolve => require(['../components/manage/studentCourse.vue'],resolve),
+          meta:{
+            title:'学生选课表'
           }
         },
         {

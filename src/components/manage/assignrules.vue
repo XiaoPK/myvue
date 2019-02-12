@@ -3,6 +3,13 @@
 </template>
 <script>
 export default {
+    data(){
+        return {
+            rulesArray:[],
+        }
+        
+    },
+    methods:{}
     
 }
 </script>

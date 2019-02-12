@@ -3,7 +3,7 @@
     <!-- 操作区----start -->
     <el-row >
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
-      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加教师</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true;this.formAdd={};">添加教师</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
       <a class="export" href="http://alish1.iyuhui.cn:8089/teacher/query/1/1000/export/excel
 ">导出数据</a>
@@ -492,6 +492,7 @@ export default {
               this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
             } else {
               this.$message.error("error：" + res.message);
+              console.log(res.message)
             }
           })
           .catch(error => {
