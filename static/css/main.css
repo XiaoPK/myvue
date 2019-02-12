@@ -23,6 +23,27 @@ body,
     background-color: #409EFF;
     color: #fff;
 }
+.export{
+    display: inline-block;
+    width: 100px;
+    height: 35px;
+    line-height: 35px;
+    border: none;
+    border-radius: 4px;
+    font-size: 15px;
+    text-decoration: none;
+    cursor: pointer;
+    text-align: center;
+    margin-left:8px;
+    background-color: #409eff;
+    color: #fff;
+  }
+  .upload {
+    text-align: center;
+  }
+  .error {
+    color: red;
+  }
 /* .login-wrap{
     background: rgba(56, 157, 170, 0.82);;
 }

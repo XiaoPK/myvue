@@ -35,3 +35,8 @@ export const queryCache = () => {
 export const uploadCache = () => {
   return http.requestPut(apiUrl + "/add/import/save")
 }
+
+//导出
+export const exportData = () =>{
+  return http.requestQuickGet(apiUrl + "/query/1/10000/export/excel")
+}

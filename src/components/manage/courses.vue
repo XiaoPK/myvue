@@ -4,7 +4,8 @@
     <el-row>
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
-      <el-button size="medium" type="primary">导出数据</el-button>
+      <a href="http://alish1.iyuhui.cn:8089/course/query/1/1000/export/excel
+" class="export">导出数据</a>
     </el-row>
     <br>
     <div>

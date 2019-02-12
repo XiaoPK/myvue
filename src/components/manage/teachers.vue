@@ -5,7 +5,8 @@
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
       <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加教师</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
-      <el-button size="medium" type="primary">导出数据</el-button>
+      <a class="export" href="http://alish1.iyuhui.cn:8089/teacher/query/1/1000/export/excel
+">导出数据</a>
     </el-row>
     <br>
     <!-- 操作区----end -->
@@ -183,12 +184,24 @@
 </template>
 
 <style>
+.export{
+  display: inline-block;
+  width: 100px;
+  height: 35px;
+  line-height: 35px;
+  border: none;
+  border-radius: 4px;
+  font-size: 15px;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: center;
+  margin-left:8px;
+  background-color: #409eff;
+  color: #fff;
+}
 .upload {
   text-align: center;
 }
- .top {
-      text-align: center;
-    }
 .error {
   color: red;
 }
@@ -259,6 +272,7 @@ export default {
     };
   },
   methods: {
+    //导出模块
     //导入模块
     cleanCache(){
       this.tip = '';
