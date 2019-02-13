@@ -382,7 +382,6 @@ export default {
         .query(index, size)
         .then(res => {
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.tableData = res.result.results;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
@@ -410,11 +409,26 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
+    check(param){    
+      if(param.courseNumber == ''){
+        this.$message.error("请输入课程编号");
+        return false
+      }
+       if(param.courseName == ''){
+        this.$message.error("请输入课程名称");
+        return false
+      }
+      if(param.period == ''){
+        this.$message.error("请输入课时量");
+        return false
+      }
+      return true
+    },
     save() {
       if (!this.dialogFormVisible) {
-        console.log(this.formAdd);
-        console.log(JSON.stringify(this.formAdd));
-        //var abc = courseApi.add(JSON.stringify(this.formAdd));
+        if(!this.check(this.formAdd)){
+          return false
+        }
         courseApi
           .add(this.formAdd)
           .then(res => {
@@ -430,6 +444,9 @@ export default {
             this.$message.error(error + "");
           });
       } else {
+        if(!this.check(this.formEdit)){
+          return false
+        }
         courseApi
           .update(this.formEdit)
           .then(res => {

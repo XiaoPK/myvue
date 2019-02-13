@@ -418,8 +418,20 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
+    check(param){
+      for(let item in param){
+        if(param[item] == ''){
+          this.$message.error("请把信息输入完整，不得为空!")
+          return false
+        }
+      }
+      return true
+    },
     save() {
       if (!this.dialogFormVisible) {
+        if(!this.check(this.formAdd)){
+          return false
+        }
         console.log(this.formAdd);
         studentApi
           .add(this.formAdd)
@@ -434,11 +446,14 @@ export default {
             }
           })
           .catch(error => {
-            this.$message.error(error + "");
+            this.$message.error(error + "请检查参数是否合法!");
           });
         this.formAdd = {};
         this.dialogAddVisible = false;
       } else {
+        if(!this.check(this.fromEdit)){
+          return false
+        }
         studentApi
           .update(this.formEdit)
           .then(res => {
@@ -452,7 +467,7 @@ export default {
             }
           })
           .catch(error => {
-            this.$message.error(error + "");
+            this.$message.error(error + "请检查参数是否合法!");
           });
       }
     }

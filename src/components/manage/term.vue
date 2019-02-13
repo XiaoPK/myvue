@@ -66,7 +66,7 @@
         </el-form-item>
         <el-form-item label="开设课程" prop="type">
           <el-checkbox-group
-            v-model="formAdd.offerCourses"
+            v-model="offerCourses"
             size="medium"
             @change="handleCheckedCitiesChange"
           >
@@ -132,10 +132,18 @@ export default {
         termName: "",
         weeks: ""
       },
+      offerCourses:[],
       multipleSelection: []
     };
   },
   methods: {
+      timestampToTime(timestamp) {
+        var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+        var Y = date.getFullYear() + '-';
+        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
+        var D = date.getDate();
+        return Y+M+D;
+    },
     //得到课程
     getCourses() {
       courseApi
@@ -143,7 +151,6 @@ export default {
         .then(res => {
           console.log(res);
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.courses = res.result.results;
             console.log(this.courses);
           } else {
@@ -182,7 +189,17 @@ export default {
         .then(res => {
           console.log(res);
           if (res.code == "140001") {
-            this.tableData = res.result.results;
+            let re = res.result.results;
+            for (let i = 0; i < re.length; i++) {
+                re[i].beginDay = this.timestampToTime(re[i].beginDay)
+                re[i].endDay = this.timestampToTime(re[i].endDay)
+                let str = ''
+                for(let j = 0; j < re[i].offerCourses.length; j++){
+                    str += re[i].offerCourses[j] + ','
+                }   
+                re[i].offerCourses = str;
+            }
+            this.tableData = re;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
             this.$message.error("请求失败，错误描述为：" + res.message);
@@ -226,7 +243,9 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
+   
     save() {
+        this.formAdd.offerCourses = this.offerCourses;
         console.log(this.formAdd)
       termApi
         .add(this.formAdd)

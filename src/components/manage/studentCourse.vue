@@ -45,8 +45,8 @@
             :value="item.id"
           ></el-option>
         </el-select>
-
-        <el-select v-model="formAdd.studentId" placeholder="请选择学生">
+ 
+        <el-select style="margin-top:20px;" v-model="formAdd.studentId" placeholder="请选择学生">
           <el-option
             v-for="item in studentData"
             :key="item.studentNumber"
@@ -55,7 +55,7 @@
           ></el-option>
         </el-select>
 
-        <el-select v-model="formAdd.courseId" placeholder="请选择课程">
+        <el-select style="margin-top:20px;" v-model="formAdd.courseId" placeholder="请选择课程">
           <el-option
             v-for="item in courseData"
             :key="item.courseName"
@@ -148,7 +148,6 @@ export default {
         .query(page, size)
         .then(res => {
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.termData = res.result.results;
             console.log(this.termData);
             console.log(res.result);
@@ -165,7 +164,6 @@ export default {
         .query(page, size)
         .then(res => {
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.courseData = res.result.results;
             console.log(this.courseData);
           } else {
@@ -181,7 +179,6 @@ export default {
         .query(page, size)
         .then(res => {
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.studentData = res.result.results;
             console.log(this.studentData);
           } else {
@@ -197,7 +194,6 @@ export default {
         .query(index, size)
         .then(res => {
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.tableData = res.result.results;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
@@ -205,7 +201,7 @@ export default {
           }
         })
         .catch(error => {
-          this.$message.error(error + "");
+          this.$message.error(error + "请检查网络连接!");
         });
     },
 
@@ -258,7 +254,37 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
+    check(formAdd){
+      if(formAdd.termId == ''){
+        this.$message.error("请输入学期!")
+        return false
+      }
+      if(formAdd.courseId == ''){
+        this.$message.error("请输入所选课程!")
+        return false
+      }
+      if(formAdd.studentId == ''){
+        this.$message.error("请输入学生!")
+        return false
+      }
+      for (let i = 0; i < this.termData.length; i++) {
+        if(formAdd.termId == this.termData[i].id){
+          var termCourses = this.termData[i].offerCourses
+          console.log(termCourses)
+        }  
+      }
+      if(termCourses.indexOf(formAdd.courseId) < 0){
+        this.$message.error("该学期未开设此类课程!")
+        return false
+      }else{
+        return true
+        }
+    },
     save() {
+      //校验
+      if(!this.check(this.formAdd)){
+        return 
+      }
       stuCouApi
         .add(this.formAdd)
         .then(res => {
@@ -271,7 +297,7 @@ export default {
           }
         })
         .catch(error => {
-          this.$message.error(error + "");
+          this.$message.error("选课信息重复!请仔细检查!");
         });
     }
   },

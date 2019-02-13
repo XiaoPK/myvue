@@ -161,23 +161,6 @@ h2 {
   width: 400px;
   float: left;
 }
-.btn-add {
-  display: block;
-  width: 220px;
-  height: 40px;
-  line-height: 40px;
-  border: none;
-  border-radius: 4px;
-  font-size: 18px;
-  text-align: center;
-  cursor: pointer;
-  margin: 8px auto;
-  background-color: #409eff;
-  color: #fff;
-}
-.btn-add:hover {
-  background-color: rgb(103, 178, 253);
-}
 </style>
 
 <script>
@@ -430,11 +413,20 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
+    check(param){
+        for(let item in param){
+        if(param[item] == ''){
+          this.$message.error("请把信息输入完整，不得为空!")
+          return false
+        }
+      }
+      return true
+    },
     save() {
       if (!this.dialogFormVisible) {
-        console.log(this.formAdd);
-        console.log(JSON.stringify(this.formAdd));
-        //var abc = labsApi.add(JSON.stringify(this.formAdd));
+        if(!this.check(this.formAdd)){
+          return false
+        }
         labsApi
           .add(this.formAdd)
           .then(res => {
@@ -450,6 +442,9 @@ export default {
             this.$message.error(error + "");
           });
       } else {
+        if(!this.check(this.formEdit)){
+          return false
+        }
         labsApi
           .update(this.formEdit)
           .then(res => {

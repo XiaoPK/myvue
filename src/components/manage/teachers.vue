@@ -3,7 +3,7 @@
     <!-- 操作区----start -->
     <el-row >
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
-      <el-button size="medium" type="primary" @click="dialogAddVisible = true;this.formAdd={};">添加教师</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加教师</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
       <a class="export" href="http://alish1.iyuhui.cn:8089/teacher/query/1/1000/export/excel
 ">导出数据</a>
@@ -128,7 +128,7 @@
         </el-form-item>
         <el-form-item label="教授课程" prop="type">
           <el-checkbox-group
-            v-model="formAdd.teachCourses"
+            v-model="teachCourses"
             size="medium"
             @change="handleCheckedCitiesChange"
           >
@@ -258,6 +258,7 @@ export default {
         office: "",
         phone: ""
       },
+      teachCourses:[],
       formEdit: {
         //表单对象
         teacherNumber: "",
@@ -385,7 +386,6 @@ export default {
         .then(res => {
           console.log(res);
           if (res.code == "140001") {
-            this.$message.success("请求成功");
             this.courses = res.result.results;
             console.log(this.courses);
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
@@ -399,7 +399,7 @@ export default {
     },
     handleCheckedCitiesChange(value) {
       let checkedCount = value.length;
-      console.log("点击");
+      console.log("点击"+'-------'+ value + this.formAdd);
       this.checkAll = checkedCount === this.courses.length;
       this.isIndeterminate =
         checkedCount > 0 && checkedCount < this.courses.length;
@@ -479,8 +479,21 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
+    check(param){
+      for(let item in param){
+        if(param[item] == ''){
+          this.$message.error("请把信息输入完整,不得为空!")
+          return false
+        }
+      }
+      return true
+    },
     save() {
       if (!this.dialogFormVisible) {
+        this.formAdd.teachCourses = this.teachCourses
+        if(!this.check(this.formAdd)){
+          return false
+        }
         console.log(this.formAdd);
         teacherApi
           .add(this.formAdd)
@@ -501,6 +514,9 @@ export default {
         this.formAdd = {};
         this.dialogAddVisible = false;
       } else {
+         if(!this.check(this.formEdit)){
+          return false
+        }
         teacherApi
           .update(this.formEdit)
           .then(res => {

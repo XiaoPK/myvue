@@ -1,16 +1,5 @@
 <template>
   <div>
-    <!-- 时间 -->
-    <div class="time">
-      <span class="demonstration">1、请选择本学期起止时间</span>
-      <el-date-picker
-        v-model="value"
-        type="daterange"
-        range-separator="至"
-        start-placeholder="开始日期"
-        end-placeholder="结束日期"
-      ></el-date-picker>
-    </div>
     <div class="time">
       <span class="demonstration">2、请选择分配规则</span>
       <el-checkbox-group

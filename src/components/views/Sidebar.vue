@@ -73,8 +73,8 @@
                             }, 
                             
                             {
-                                index: 'adjustment',
-                                title: '调整实验室'
+                                index: 'assignresult',
+                                title: '分配结果'
                             }
                         ]
                     },
