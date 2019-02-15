@@ -3,6 +3,7 @@ import axios from 'axios'
 
 axios.defaults.withCredentials = true //跨域
 axios.defaults.timeout = 1000000
+axios.defaults.headers.post['Content-Type'] = 'application/json'
 
 export default {
   //get请求
