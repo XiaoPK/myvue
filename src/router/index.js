@@ -1,8 +1,6 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-//import login from '../components/login.vue'
 import home from '../components/views/Home.vue'
-//import { resolve } from 'path';
 
 Vue.use(Router)
 
@@ -11,8 +9,43 @@ export default new Router({
     {
       path: '/',
       name: 'home',
+      meta:{
+        title:"首页"
+      },
       component: home,
       children:[
+        {
+          path: '/yourCourse',
+          name: 'yourCourse',
+          component: resolve => require(['../components/personal/yourCourse.vue'],resolve),
+          meta:{
+            title:'相关课程'
+          }
+        },
+        {
+          path: '/classManage',
+          name: 'classManage',
+          component: resolve => require(['../components/personal/classManage.vue'],resolve),
+          meta:{
+            title:'课堂管理'
+          }
+        },
+        {
+          path: '/personalInfo',
+          name: 'personalInfo',
+          component: resolve => require(['../components/personal/personalInfo.vue'],resolve),
+          meta:{
+            title:'个人信息'
+          }
+        },
+        {
+          path: '/changePassword',
+          name: 'changePassword',
+          component: resolve => require(['../components/personal/changePassword.vue'],resolve),
+          meta:{
+            title:'修改密码'
+          }
+        },
         {
           path: '/students',
           name: 'students',
@@ -62,14 +95,6 @@ export default new Router({
           }
         },
         {
-          path: '/assignrules',
-          name: 'assignrules',
-          component: resolve => require(['../components/manage/assignrules.vue'],resolve),
-          meta:{
-            title:'分配实验室'
-          }
-        },
-        {
           path: '/assignlabs',
           name: 'assignrlabs',
           component: resolve => require(['../components/manage/assignlabs.vue'],resolve),
@@ -84,13 +109,50 @@ export default new Router({
           meta:{
             title:'分配结果'
           }
-        }
+        },
+        {
+          path: '/menus',
+          name: 'menus',
+          component: resolve => require(['../components/userManage/menus.vue'],resolve),
+          meta:{
+            title:'菜单管理'
+          }
+        },
+        {
+          path: '/permissions',
+          name: 'permissions',
+          component: resolve => require(['../components/userManage/permissions.vue'],resolve),
+          meta:{
+            title:'权限管理'
+          }
+        },
+        {
+          path: '/roles',
+          name: 'roles',
+          component: resolve => require(['../components/userManage/roles.vue'],resolve),
+          meta:{
+            title:'角色管理'
+          }
+        },
+        {
+          path: '/users',
+          name: 'users',
+          component: resolve => require(['../components/userManage/users.vue'],resolve),
+          meta:{
+            title:'用户管理'
+          }
+        },
       ]
     },
     {
       path:'/login',
       name:'login',
       component: resolve => require(['../components/login.vue'],resolve)
+    },
+    {
+      path:"/index",
+      name:"index",
+      component: resolve => require(['../components/index.vue'],resolve)
     }
   ]
 })

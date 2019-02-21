@@ -1,9 +1,14 @@
 require('es6-promise').polyfill()
 import axios from 'axios'
 
+
 axios.defaults.withCredentials = true //跨域
 axios.defaults.timeout = 1000000
 axios.defaults.headers.post['Content-Type'] = 'application/json'
+axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
+
+//axios.defaults.headers.token = sessionStorage.getItem('token')
+console.log(sessionStorage.getItem('token'))
 
 export default {
   //get请求

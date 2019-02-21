@@ -28,8 +28,36 @@
                 collapse: false,
                 menuList: [
                     {
+                         icon: 'el-icon-tickets',
+                        index:'1',
+                        title:"相关课程",
+                        subs:[{
+                            index:"yourCourse",
+                            title:"最近课程"
+                        },
+                        {
+                            index:"classManage",
+                            title:"课堂管理"
+                        }
+                        ]
+                    },
+                    {
+                         icon: 'el-icon-tickets',
+                        index:'2',
+                        title:"个人信息",
+                        subs:[{
+                            index:"personalInfo",
+                            title:"修改个人信息"
+                        },
+                        {
+                            index:"changePassword",
+                            title:"修改密码"
+                        }
+                        ]
+                    },
+                    {
                         icon: 'el-icon-tickets',
-                        index: '1',
+                        index: '3',
                         title: '管理信息',
                         subs: [
                             {
@@ -60,13 +88,9 @@
                     },
                     {
                         icon: 'el-icon-setting',
-                        index: '2',
+                        index: '4',
                         title: '课程分配',
                         subs: [
-                            {
-                                index: 'assignrules',
-                                title: '分配规则'
-                            },
                             {
                                 index: 'assignlabs',
                                 title: '分配实验室'
@@ -80,16 +104,24 @@
                     },
                     {
                         icon: 'el-icon-setting',
-                        index: '3',
-                        title: '其他',
+                        index: '5',
+                        title: '权限与用户',
                         subs: [
                             {
-                                index: 'assignlabs',
-                                title: '分配实验室'
+                                index: 'menus',
+                                title: '菜单管理'
                             }, 
                             {
-                                index: 'adjustment',
-                                title: '调整实验室'
+                                index:'permissions',
+                                title:"权限管理"
+                            },
+                            {
+                                index: 'roles',
+                                title: '角色管理'
+                            },
+                            {
+                                index:'users',
+                                title:'用户管理'
                             }
                         ]
                     }

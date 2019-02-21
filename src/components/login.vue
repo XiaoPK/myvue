@@ -6,8 +6,8 @@
         <div class="login-area">
             <div class="form-group">
                 <el-form :model="loginForm" :rules="loginRules" ref="loginForm" label-position="left" label-width="0px">
-                    <el-form-item prop="name">
-                        <el-input v-model="loginForm.name" type="text" placeholder="account"></el-input>
+                    <el-form-item prop="account">
+                        <el-input v-model="loginForm.account" type="text" placeholder="account"></el-input>
                     </el-form-item>
                     <el-form-item prop="password">
                         <el-input v-model="loginForm.password" type="password" placeholder="password"></el-input>
@@ -22,16 +22,16 @@
 </template>
 
 <script>
-
+import * as userApi from "../apis/permission/user.js"
 export default {
     data() {
         return {
             loginForm: {
-                name: '',
+                account: '',
                 password: ''
             },
             loginRules: {
-                name: [
+                account: [
                     {required: true, message: '', trigger: 'blur'}
                 ],
                 password :[
@@ -43,23 +43,35 @@ export default {
     },
     methods: {
         submitForm(){
-            this.$refs.loginForm.validate((valid) => {
-                if (valid) {
-                    // this.login({
-                    //     name: this.loginForm.name,
-                    //     password: this.loginForm.password
-                    // }).then(res => {
-                    //     if(res.login){
-                    //         this.$router.push('home')
-                    //     } else {
-                    //         this.sysMsg = '账号或密码输入错误'
-                    //     }
-					// })
-					this.sysMsg = '账号或密码输入错误'
-                } else {
-                    return false
+            userApi.login(this.loginForm).then(res => {
+                if(res.code == "140001"){
+                    let token = res.result.token
+                    sessionStorage.setItem("token",token)
+                    console.log(res.result.token)
+                    this.$router.push('/')                   
+                }else{
+                    this.sysMsg="账号或密码错误！"
                 }
-            });
+            }).catch(error => {
+                this.sysMsg = "error" + error
+            })
+            // this.$refs.loginForm.validate((valid) => {
+            //     if (valid) {
+            //         this.login({
+            //             name: this.loginForm.name,
+            //             password: this.loginForm.password
+            //         }).then(res => {
+            //             if(res.login){
+            //                 this.$router.push('home')
+            //             } else {
+            //                 this.sysMsg = '账号或密码输入错误'
+            //             }
+			// 		})
+			// 		this.sysMsg = '账号或密码输入错误'
+            //     } else {
+            //         return false
+            //     }
+            // });
 		}
     }
 }

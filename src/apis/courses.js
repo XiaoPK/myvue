@@ -18,6 +18,9 @@ export const update = (courseObj) => {
   return http.requestPost(apiUrl + "/update", courseObj)
 }
 
+export const  search = (page,size,str) => {
+  return http.requestPost(apiUrl + '/query/page/example/' + page + "/" + size, str )
+}
 
 // //批量添加-通过文件批量上传
 // export const addUpload = (params) => {

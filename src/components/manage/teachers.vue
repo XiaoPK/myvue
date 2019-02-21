@@ -7,6 +7,15 @@
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
       <a class="export" href="http://alish1.iyuhui.cn:8089/teacher/query/1/1000/export/excel
 ">导出数据</a>
+ <div style="display:inline-block;margin-left:150px;">
+        <el-input placeholder="请输入内容" size="medium" v-model="search" class="input-with-select">
+          <el-select v-model="select" slot="prepend" placeholder="请选择">
+            <el-option label="姓名" value="teacherName"></el-option>
+            <el-option label="编号" value="teacherNumber"></el-option>
+          </el-select>
+          <el-button slot="append" icon="el-icon-search" @click="searchAll"></el-button>
+        </el-input>
+      </div>
     </el-row>
     <br>
     <!-- 操作区----end -->
@@ -221,6 +230,9 @@ export default {
   name: "teachers",
   data() {
     return {
+      select:"",
+      search:"",
+      searchFlag:false,
       fileList:[],
       courses: {},
       pageInfo: {
@@ -273,6 +285,26 @@ export default {
     };
   },
   methods: {
+    //搜索
+        searchAll(page,size){
+      let str = {}
+      if(this.select=="teacherName"){
+        str.teacherName = this.search;
+      }else if(this.select=="teacherNumber"){
+        str.teacherNumber = this.search
+      }
+      teacherApi.search(this.pageInfo.pageIndex,this.pageInfo.pageSize,str).then(res => {
+        if(res.code == "140001"){
+          this.tableData = res.result.results
+          this.searchFlag = true;
+          this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+        }else{
+          this.$message.error("error" + res.message)
+        }
+      }).catch(error => {
+        this.$message.error("" + error)
+      })
+    },
     //导出模块
     //导入模块
     cleanCache(){
@@ -463,10 +495,18 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
+      if(this.searchFlag){
+        this.searchAll(this.pageInfo.pageIndex,val)
+        return
+      }
       this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
+      if(this.searchFlag){
+        this.searchAll(val, this.pageInfo.pageSize)
+        return
+      }
       this.queryTable(val, this.pageInfo.pageSize);
     },
 

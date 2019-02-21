@@ -7,5 +7,10 @@ export const assign = (termId,rules) => {
 }
 
 export const assignSimple = (termId,rules) => {
-  return http.requestPost(apiUrl + "/assign/" + termId + '/simple', rules)
+  return http.requestPost(apiUrl + "/assign/assign/" + termId + '/simple', rules)
+}
+
+
+export const query = () => {
+  return http.requestQuickGet(apiUrl + "/assign/query/rule");
 }

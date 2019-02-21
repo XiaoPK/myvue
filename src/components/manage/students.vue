@@ -1,12 +1,23 @@
 <template>
   <div>
     <!-- 操作区----start -->
-    <el-row>
+    <el-row class="row">
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
-      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加学生</el-button>  
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加学生</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
       <a class="export" href="http://alish1.iyuhui.cn:8089/student/query/1/1000/export/excel
 ">导出数据</a>
+      <div style="display:inline-block;margin-left:150px;">
+        <el-input placeholder="请输入内容" size="medium" v-model="search" class="input-with-select">
+          <el-select v-model="select" slot="prepend" placeholder="请选择">
+            <el-option label="姓名" value="studentName"></el-option>
+            <el-option label="学号" value="studentNumber"></el-option>
+            <el-option label="年级" value="grade"></el-option>
+            <el-option label="学院" value="college"></el-option>
+          </el-select>
+          <el-button slot="append" icon="el-icon-search" @click="searchAll"></el-button>
+        </el-input>
+      </div>
     </el-row>
     <br>
     <!-- 操作区----end -->
@@ -175,6 +186,15 @@
 .right {
   float: right;
 }
+.row {
+  display: inline;
+}
+.el-select .el-input {
+  width: 100px;
+}
+.input-with-select .el-input-group__prepend {
+  background-color: #fff;
+}
 </style>
 
 <script>
@@ -183,15 +203,18 @@ export default {
   name: "students",
   data() {
     return {
-      fileList:[],
+      search:"",
+      select:"",
+      searchFlag:false,
+      fileList: [],
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
         pageTotal: 1
       },
-      disabled:"",
+      disabled: "",
       tableData: [],
-      tableDataCache:[],
+      tableDataCache: [],
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       form: {
@@ -230,12 +253,41 @@ export default {
     };
   },
   methods: {
-    cleanCache(){
-      this.tip = '';
-      this.errorTip = ''
-      this.tableDataCache = []
-      this.fileList =[];
-      this.dialogUploadVisible = true
+    searchAll(page,size){
+      let str = {}
+      if(this.select=="studentName"){
+        str.studentName = this.search;
+      }else if(this.select=="studentNumber"){
+        str.studentNumber = this.search
+      }else if(this.select=="grade"){
+        str.grade = this.search
+      }else if(this.select=="college"){
+        str.college = this.search
+      }
+      studentApi.search(this.pageInfo.pageIndex,this.pageInfo.pageSize,str).then(res => {
+        if(res.code == "140001"){
+          for (let i = 0; i < res.result.results.length; i++) {
+              res.result.results[i].birthday = this.timestampToTime(
+                res.result.results[i].birthday
+              );
+              console.log(res.result.results[i]);
+            }
+          this.tableData = res.result.results
+          this.searchFlag = true;
+          this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+        }else{
+          this.$message.error("error" + res.message)
+        }
+      }).catch(error => {
+        this.$message.error("" + error)
+      })
+    },
+    cleanCache() {
+      this.tip = "";
+      this.errorTip = "";
+      this.tableDataCache = [];
+      this.fileList = [];
+      this.dialogUploadVisible = true;
     },
     submitUpload() {
       studentApi
@@ -243,7 +295,7 @@ export default {
         .then(res => {
           if (res.result.cached) {
             this.tip = "文件缓存成功,请及时保存!";
-            this.disabled = false
+            this.disabled = false;
           } else {
             this.$message.error("请求失败,请稍后重试!" + res.message);
           }
@@ -259,7 +311,7 @@ export default {
           console.log(res);
           if (res.code == "140001") {
             this.$message.success("保存成功!");
-            this.queryTable(this.pageInfo.pageIndex,this.pageInfo.pageSize)
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
           } else {
             this.$message.error("保存失败:" + res.message);
           }
@@ -276,14 +328,19 @@ export default {
     handleRemove(file, fileList) {
       console.log(file, fileList);
     },
-    getErrors(param){
+    getErrors(param) {
       for (let i = 0; i < param.length; i++) {
-        if(param[i].isError != ''){
-          console.log(param[i].isError)
-          this.errorTip += "学号"+param[i].studentNumber + '发生错误：' + param[i].isError + "'\'n"
+        if (param[i].isError != "") {
+          console.log(param[i].isError);
+          this.errorTip +=
+            "学号" +
+            param[i].studentNumber +
+            "发生错误：" +
+            param[i].isError +
+            "''n";
         }
       }
-      console.log(this.errorTip)
+      console.log(this.errorTip);
     },
     handleSuccess(res) {
       console.log("文件上传成功");
@@ -293,12 +350,17 @@ export default {
       //总数据
       for (let i = 0; i < abc.length; i++) {
         let teacherObj = {};
-        teacherObj.isError='';
+        teacherObj.isError = "";
         //每一行有七个格子
-        for (let item in abc[i].cells) {   
+        for (let item in abc[i].cells) {
           console.log(abc[i].cells[item].errorMessage);
           if (abc[i].cells[item].errorMessage != "") {
-            teacherObj.isError += "【"+abc[i].cells[item].fieldName + ":"+abc[i].cells[item].errorMessage + "】";
+            teacherObj.isError +=
+              "【" +
+              abc[i].cells[item].fieldName +
+              ":" +
+              abc[i].cells[item].errorMessage +
+              "】";
           }
           if (abc[i].cells[item].fieldName == "学号") {
             teacherObj.studentNumber = abc[i].cells[item].value;
@@ -322,29 +384,32 @@ export default {
         console.log(teacherObj);
         this.tableDataCache.push(teacherObj);
         console.log("列表————————");
-        console.log(this.tableData)
+        console.log(this.tableData);
         console.log(this.tableDataCache);
       }
       //this.tableData = this.tableData.concat(this.tableDataCache)
-      this.getErrors(this.tableDataCache)
+      this.getErrors(this.tableDataCache);
     },
     handleError(res) {
       this.$message.error("error:" + res.message);
     },
     timestampToTime(timestamp) {
-        var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
-        var Y = date.getFullYear() + '-';
-        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-        var D = date.getDate();
-        return Y+M+D;
+      var date = new Date(timestamp); //时间戳为10位需*1000，时间戳为13位的话不需乘1000
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 < 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D = date.getDate();
+      return Y + M + D;
     },
     handleEdit(rowData) {
       console.log(rowData);
       this.formEdit = rowData;
-      if(this.formEdit.sex == "BOY"){
-        this.formEdit.sex = "1"
-      }else{
-        this.formEdit.sex = "2"
+      if (this.formEdit.sex == "BOY") {
+        this.formEdit.sex = "1";
+      } else {
+        this.formEdit.sex = "2";
       }
       this.dialogFormVisible = true;
     },
@@ -371,8 +436,10 @@ export default {
           if (res.code == "140001") {
             this.$message.success("请求成功");
             for (let i = 0; i < res.result.results.length; i++) {
-              res.result.results[i].birthday = this.timestampToTime(res.result.results[i].birthday)     
-              console.log(res.result.results[i])
+              res.result.results[i].birthday = this.timestampToTime(
+                res.result.results[i].birthday
+              );
+              console.log(res.result.results[i]);
             }
             this.tableData = res.result.results;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
@@ -402,10 +469,18 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
+      if(this.searchFlag){
+        this.searchAll(this.pageInfo.pageIndex, val)
+        return
+      }
       this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
+       if(this.searchFlag){
+        this.searchAll(val, this.pageInfo.pageSize)
+        return
+      }
       this.queryTable(val, this.pageInfo.pageSize);
     },
 
@@ -418,19 +493,19 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
-    check(param){
-      for(let item in param){
-        if(param[item] == ''){
-          this.$message.error("请把信息输入完整，不得为空!")
-          return false
+    check(param) {
+      for (let item in param) {
+        if (param[item] == "") {
+          this.$message.error("请把信息输入完整，不得为空!");
+          return false;
         }
       }
-      return true
+      return true;
     },
     save() {
       if (!this.dialogFormVisible) {
-        if(!this.check(this.formAdd)){
-          return false
+        if (!this.check(this.formAdd)) {
+          return false;
         }
         console.log(this.formAdd);
         studentApi
@@ -451,8 +526,8 @@ export default {
         this.formAdd = {};
         this.dialogAddVisible = false;
       } else {
-        if(!this.check(this.fromEdit)){
-          return false
+        if (!this.check(this.fromEdit)) {
+          return false;
         }
         studentApi
           .update(this.formEdit)

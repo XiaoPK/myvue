@@ -1,8 +1,7 @@
 <template>
   <div>
-    <div>
-      <span class="demonstration">1、请选择学期</span>
-
+    <div class="box">
+      <h3 class="demonstration">1、请选择学期</h3>
       <el-select v-model="termId" placeholder="请选择学期" @change="getCourses">
         <el-option
           v-for="item in termData"
@@ -12,8 +11,8 @@
         ></el-option>
       </el-select>
     </div>
-    <div>
-      <span class="demonstration">2、请选择分配规则</span>
+    <div class="box">
+      <h3>2、请选择分配规则</h3>
       <el-form :inline="true" :model="ruleLine">
         <el-form-item label="请选择分配规则">
           <el-select v-model="ruleLine.ruleKey" placeholder="请选择分配规则" @change="changeRule">
@@ -45,33 +44,30 @@
           ></el-input-number>
         </el-form-item>
         <el-form-item v-if="flagChoice">
-            <el-radio v-model="ruleLine.ruleValue" label="true">是</el-radio>
-  <el-radio v-model="ruleLine.ruleValue" label="false">否</el-radio>
+          <el-radio v-model="ruleLine.ruleValue" label="true">是</el-radio>
+          <el-radio v-model="ruleLine.ruleValue" label="false">否</el-radio>
         </el-form-item>
-        <el-button @click="getRules">继续添加</el-button>
-        <div> {{ ruleResult }}</div>
+        <el-button @click="getRules" type="primary">保存</el-button>
+        <div>
+          <h3>已选规则列表</h3>
+          <el-table :data="ruleResultName" stripe style="width: 100%">
+            <el-table-column prop="ruleName" label="规则" width="300"></el-table-column>
+            <el-table-column prop="ruleValue" label="取值" width="200"></el-table-column>
+          </el-table>
+        </div>
       </el-form>
-    </div>
+    </div> 
     <div>
       <el-button class="btn" type="primary" @click="assignlabs()">开始分配</el-button>
-    </div>
-    <div>
-       <el-table :data="assignResult" border style="width: 100%">
-      <el-table-column prop="course" label="课程" width="180"></el-table-column>
-      <el-table-column prop="teacher" label="主讲老师" width="180"></el-table-column>
-      <el-table-column prop="name" label="上课时间"></el-table-column>
-      <el-table-column prop="classroom" label="所在教室"></el-table-column>
-    </el-table>
     </div>
   </div>
 </template>
 btn-step
 <script>
 import * as termApi from "../../apis/term.js";
-import * as ruleApi from "../../apis/rules.js";
 import * as courseApi from "../../apis/courses.js";
 import * as assignApi from "../../apis/assignResult.js";
-import bus from "../views/bus.js"
+import bus from "../views/bus.js";
 export default {
   data() {
     return {
@@ -86,10 +82,10 @@ export default {
       flagCount: false,
       flagChoice: false,
       ruleResult: [],
-      coursesArray: [],
+      ruleResultName:[],
       courseData: [],
       allRules: [],
-      assignResult:[]
+      assignResult: []
     };
   },
   methods: {
@@ -101,20 +97,33 @@ export default {
       this.offerCourses = term[0].offerCourses;
       console.log(this.offerCourses);
       console.log(term);
-      // for (let i = 0 ; i < term.offerCourses.length; i++) {
-      //   console.log(term.offerCourses[i])
-      //   var data = this.courseData.filter(function(item) {
-      //     return item.id == term.offerCourses[i];
-      //   });
-      //   console.log(data)
-      //   this.courses.push(data);
-      // }
-      // console.log(this.courses);
     },
-    getRules(){
-      this.ruleResult.push(this.ruleLine)
-      console.log(this.ruleResult)
-      this.ruleLine = {}
+    getRules() {
+      this.ruleResult.push(this.ruleLine);
+      let ruKey = this.ruleLine.ruleKey
+      for(let i = 0 ; i < this.allRules.length; i++){
+        if(this.allRules[i].ruleKey == ruKey){
+          var ruleName = this.allRules[i].ruleDetail.ruleName
+        }
+      }
+      if(this.ruleLine.ruleKey == "COURSE_CLASS_COUNT"){
+        var courId = this.ruleLine.courseId 
+        var course = this.courseData.filter(function(item){
+          return item.id == courId
+        })
+        console.log(course)
+        if(!course && (this.offerCourses.indexOf(courId)>0)){
+          this.$message.error("该课程不在本学期开设，请重新选择!")
+        }else{
+          this.ruleLine.ruleValue = course[0].courseName +'——' + this.ruleLine.classCount +'课堂'
+        }
+      }
+      if(this.ruleLine.ruleKey == "MULTIPART_CLASS_SEPARATE_DAY"){
+        this.ruleLine.ruleValue = this.ruleLine.classCount
+      }
+      this.ruleResultName.push({ruleName:ruleName,ruleValue:this.ruleLine.ruleValue})
+      console.log(this.ruleResultName);
+      this.ruleLine = {};
     },
     changeRule(val) {
       if (val == "COURSE_CLASS_COUNT") {
@@ -132,7 +141,7 @@ export default {
       }
     },
     queryRuleData() {
-      ruleApi
+      assignApi
         .query()
         .then(res => {
           if ((res.code = "140001")) {
@@ -177,76 +186,47 @@ export default {
         });
     },
 
-    check(allRules) {
-      for (let i = 0; i < allRules.length; i++) {
-        if (allRules[i].ruleName == "配置课程教学课堂数量") {
-          if (!/^[1-9]$/.test(allRules[i].ruleValue)) {
-            this.$message.error("配置课程教学课堂数量错误!请输入1-9之间的整数");
-            return false;
-          }
-        } else if (allRules[i].ruleName == "配置每周多节课课程相隔天数") {
-          if (!/^[1-4]$/.test(allRules[i].ruleValue)) {
-            this.$message.error(
-              "配置每周多节课课程相隔天数错误!请输入1-4之间的整数"
-            );
-            return false;
-          }
-        } else if (allRules[i].ruleName == "配置每周多节课不均时排课倾向") {
-          if (allRules[i].ruleValue != "front" && allRules[i] != "behind") {
-            this.$message.error(
-              "配置每周多节课不均时排课倾向错误!请输入front 或 behind"
-            );
-            return false;
+    setRules(ruleResult) {
+      let ruleArr = [];
+      let couArr = ""; //定义课程
+      let couStr = "";
+      let obj = {};
+      for (let i = 0; i < ruleResult.length; i++) {
+        if (ruleResult[i].ruleKey == "COURSE_CLASS_COUNT") {
+          couStr =
+            "{" +
+            '"courseId":' +
+            ruleResult[i].courseId +
+            ',' +
+            '"classCount":' +
+            ruleResult[i].classCount +
+            '}';
+          if (!couArr) {
+            couArr = "[" + couStr;
+          } else {
+            couArr += "," + couStr;
           }
         } else {
-          if (
-            allRules[i].ruleValue != "true" &&
-            allRules[i].ruleValue != "false"
-          ) {
-            this.$message.error(
-              allRules[i].ruleValue + "请检查true 和 false 输入是否正确!"
-            );
-            return false;
-          }
+          ruleArr.push(ruleResult[i]);
         }
       }
-      return true;
-    },
-
-    setRules(allRules) {
-      let obj = {};
-      let ruleArr = [];
-      for (let i = 0; i < allRules.length; i++) {
-        obj.ruleKey = allRules[i].ruleKey;
-        obj.ruleValue = allRules[i].ruleValue;
-        ruleArr.push(obj);
-        obj = {};
-      }
-      console.log(ruleArr);
+      couArr += "]";
+      ruleArr.push({ ruleKey: "COURSE_CLASS_COUNT", ruleValue: couArr });
       return ruleArr;
     },
     assignlabs() {
-      // var rules = [];
-      // this.check(this.allRules);
-      // console.log(this.allRules);
-      // if (!this.check(this.allRules) || this.termId == "") {
-      //   this.$message.error("请选择学期!");
-      //   return false;
-      // } else {
-      //   rules = this.setRules(this.allRules);
-      // }
-      //this.ruleResult.push(this.ruleLine);
       console.log(this.ruleResult);
-      console.log(this.termId);
+      var rules = this.setRules(this.ruleResult);
+      console.log(rules);
       assignApi
-        .assign(this.termId, this.ruleResult)
+        .assign(this.termId, rules)
         .then(res => {
           if (res.code == "140001") {
             this.$message.success("分配成功！");
             console.log(res);
-            this.assignResult = res.result
-            //bus.$emit('result', res.result)
-           // this.$router.push({ path: "/assignresult"});
+            this.assignResult = res.result;
+            localStorage.setItem('assignR',JSON.stringify(this.assignResult))
+             this.$router.push({ path: "/assignresult"});
           } else {
             this.$message.error("error" + res.message);
           }
@@ -256,6 +236,9 @@ export default {
         });
     }
   },
+  beforeDestroy(){
+    bus.$emit('result', this.assignResult)
+  },
   created() {
     this.queryTermData();
     this.queryRuleData();
@@ -264,6 +247,9 @@ export default {
 };
 </script>
 <style scroped>
+h3{
+  font-weight: 200;
+}
 .tb-edit .el-input {
   display: none;
 }
@@ -275,14 +261,13 @@ export default {
 }
 .demonstration {
   display: block;
-  color: #606266;
+  color: #343538;
   font-size: 18px;
   margin-bottom: 20px;
 }
-.time {
-  padding: 40px 0;
-  text-align: center;
-  border-right: solid 1px #eff2f6;
+.box{
+  margin-bottom: 40px;
+  margin-left: 30px;
 }
 .btn {
   margin-left: 500px;
