@@ -47,6 +47,7 @@ export default {
                 if(res.code == "140001"){
                     let token = res.result.token
                     sessionStorage.setItem("token",token)
+                    sessionStorage.setItem("account",this.loginForm.account)
                     console.log(res.result.token)
                     this.$router.push('/')                   
                 }else{
@@ -55,23 +56,6 @@ export default {
             }).catch(error => {
                 this.sysMsg = "error" + error
             })
-            // this.$refs.loginForm.validate((valid) => {
-            //     if (valid) {
-            //         this.login({
-            //             name: this.loginForm.name,
-            //             password: this.loginForm.password
-            //         }).then(res => {
-            //             if(res.login){
-            //                 this.$router.push('home')
-            //             } else {
-            //                 this.sysMsg = '账号或密码输入错误'
-            //             }
-			// 		})
-			// 		this.sysMsg = '账号或密码输入错误'
-            //     } else {
-            //         return false
-            //     }
-            // });
 		}
     }
 }
