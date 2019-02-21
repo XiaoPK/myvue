@@ -1,17 +1,21 @@
 <template>
   <div>
-    <h1 class="welcome">尊敬的老师，欢迎您!</h1>
-    <h3 class="welcome" style="margin-top: 50px;">>>>您最近的课程安排如下</h3>
+    <h2 class="welcome">您最近的课程安排如下</h2>
     <div class="course">
       <template v-for="item in tableData">
         <el-card class="box-card" :key="item.course" shadow="hover">
           <div slot="header" class="clearfix">
             <span>{{ item.course }}</span>
+            <el-button style="float: right; padding: 3px 0" type="text">查看课堂</el-button>
           </div>
           <div class="text item">
             时间：{{ item.name }}
             <br>
             地点：{{ item.classroom }}
+            <br>
+            教师：{{ item.teacher }}
+            <br>
+            学生数量：{{ item.stuCount}}
           </div>
         </el-card>
       </template>
@@ -19,11 +23,12 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 .welcome {
   font-weight: normal;
   margin-left: 50px;
   margin-right: 50px;
+  margin-bottom: 20px;
 }
 .course {
   margin-top: 10px;
@@ -32,7 +37,7 @@
   display: inline-flex;
 }
 .text {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .item {
@@ -49,7 +54,7 @@
 }
 
 .box-card {
-  width: 200px;
+  width: 240px;
   margin-right: 20px;
 }
 </style>

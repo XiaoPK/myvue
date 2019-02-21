@@ -40,8 +40,6 @@
     <a class="btn-add" @click="updateInfo">确认保存</a>
   </div>
 </template>
-<style>
-</style>
 
 <script>
 import * as teacherApi from "../../apis/teachers.js";

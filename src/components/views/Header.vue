@@ -9,7 +9,7 @@
             <div class="header-user-con">
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
-                    <span class="el-dropdown-link">
+                    <span class="el-dropdown-link" style="font-size:16px">
                     {{name}}<i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
@@ -29,12 +29,13 @@
         data() {
             return {
                 collapse: false,
-                name: 'abc',
+                name: sessionStorage.getItem('username'),
             }
         },
         computed:{
             username(){
-               // let username = this.$common.getSessionStorage('username');
+                // let username = sessionStorage.getItem("username");
+                // console.log(username)
                 return username ? username : this.name;
             }
         },
@@ -42,6 +43,7 @@
             // 用户名下拉菜单选择事件
             handleCommand(command) {
                 if(command == 'loginout'){
+                    sessionStorage.setItem('token',0)
                     this.$router.push('/login');
                 }
             },
