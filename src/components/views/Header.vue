@@ -10,7 +10,7 @@
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link" style="font-size:16px">
-                    {{name}}<i class="el-icon-caret-bottom"></i>
+                    {{ name }}<i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
                         <a href=" " target="_blank">
@@ -29,15 +29,15 @@
         data() {
             return {
                 collapse: false,
-                name: sessionStorage.getItem('username'),
+                name: ''
             }
         },
         computed:{
-            username(){
-                // let username = sessionStorage.getItem("username");
-                // console.log(username)
-                return username ? username : this.name;
-            }
+            // username(){
+            //     // let username = sessionStorage.getItem("username");
+            //     // console.log(username)
+            //     return username ? username : this.name;
+            // }
         },
         methods:{
             // 用户名下拉菜单选择事件
@@ -52,6 +52,9 @@
                 this.collapse = !this.collapse;
                 bus.$emit('collapse', this.collapse);
             },
+        },
+        created(){
+            this.name = sessionStorage.getItem('username')
         }
     }
 </script>
