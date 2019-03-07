@@ -3,10 +3,14 @@
     <!-- 操作区----start -->
     <el-row>
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加实验室</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
-      <a href="http://alish1.iyuhui.cn:8089/classroom/query/1/1000/export/excel
-" class="export">导出数据</a>
-<div style="display:inline-block;margin-left:150px;">
+      <a
+        href="http://alish1.iyuhui.cn:8089/classroom/query/1/1000/export/excel
+"
+        class="export"
+      >导出数据</a>
+      <div style="display:inline-block;margin-left:150px;">
         <el-input placeholder="请输入内容" size="medium" v-model="search" class="input-with-select">
           <el-select v-model="select" slot="prepend" placeholder="请选择">
             <el-option label="名称" value="classroomName"></el-option>
@@ -18,68 +22,66 @@
     </el-row>
     <br>
     <div>
-      <div class="tabwidth">
-        <!-- 表格---start -->
-        <el-table
-          :data="tableData"
-          stripe
-          style="width: 600px"
-          :default-sort="{prop: 'classroomNumber', order: 'descending'}"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="50"></el-table-column>
-          <el-table-column prop="classroomNumber" sortable label="编号" width="100"></el-table-column>
-          <el-table-column prop="classroomName" label="名称" width="100"></el-table-column>
-          <el-table-column prop="capacity" label="容量" width="50"></el-table-column>
-          <el-table-column prop="enabled" label="当前状态" width="80"></el-table-column>
-          <el-table-column label="操作" fixed="right" min-width="120">
-            <template slot-scope="scope">
-              <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-              <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination
-          background
-          layout="total,sizes,prev, pager, next,jumper"
-          :current-page="pageInfo.pageIndex"
-          :page-size="pageInfo.pageSize"
-          :total="pageInfo.pageTotal"
-          :page-sizes="[5, 10, 20, 50]"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        ></el-pagination>
-        <!-- 表格---end -->
-      </div>
-      <div class="right wide" title="添加实验室信息">
-        <el-row>
-          <h2>添加实验室信息</h2>
-        </el-row>
-        <el-form
-          :label-position="labelPosition"
-          label-width="100px"
-          :inline="true"
-          :rules="rules"
-          :model="formAdd"
-        >
-          <el-form-item label="实验室编号">
-            <el-input v-model="formAdd.classroomNumber" placeholder="实验室编号"></el-input>
-          </el-form-item>
-          <el-form-item label="实验室名称">
-            <el-input v-model="formAdd.classroomName" placeholder="实验室名称"></el-input>
-          </el-form-item>
-          <el-form-item label="可容纳人数">
-            <el-input v-model="formAdd.capacity" type="number" min="0" placeholder="可容纳人数"></el-input>
-          </el-form-item>
-
-          <el-form-item label="是否可用">
-            <el-radio v-model="formAdd.enabled" label="2">否</el-radio>
-            <el-radio v-model="formAdd.enabled" label="1">是</el-radio>
-          </el-form-item>
-          <a class="btn-add" type="primary" @click="save()">确定添加</a>
-        </el-form>
-      </div>
+      <!-- 表格---start -->
+      <el-table
+        :data="tableData"
+        stripe
+        style="width: 900px"
+        :default-sort="{prop: 'classroomNumber', order: 'descending'}"
+        @selection-change="handleSelectionChange"
+        v-loading="loading"
+      >
+        <el-table-column type="selection" width="50"></el-table-column>
+        <el-table-column prop="classroomNumber" sortable label="编号" width="100"></el-table-column>
+        <el-table-column prop="classroomName" label="名称" width="150"></el-table-column>
+        <el-table-column prop="capacity" label="容量" width="100"></el-table-column>
+        <el-table-column prop="enabled" label="当前状态" width="150"></el-table-column>
+        <el-table-column label="操作" fixed="right" min-width="150">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        background
+        layout="total,sizes,prev, pager, next,jumper"
+        :current-page="pageInfo.pageIndex"
+        :page-size="pageInfo.pageSize"
+        :total="pageInfo.pageTotal"
+        :page-sizes="[5, 10, 20, 50, 10000]"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+      <!-- 表格---end -->
     </div>
+    <!-- 新增弹框 -->
+    <el-dialog title="添加实验室信息" :visible.sync="dialogAddVisible" width="700px">
+      <el-form
+        :label-position="labelPosition"
+        label-width="100px"
+        :inline="true"
+        :rules="rules"
+        :model="formAdd"
+      >
+        <el-form-item label="实验室编号">
+          <el-input v-model="formAdd.classroomNumber" placeholder="实验室编号"></el-input>
+        </el-form-item>
+        <el-form-item label="实验室名称">
+          <el-input v-model="formAdd.classroomName" placeholder="实验室名称"></el-input>
+        </el-form-item>
+        <el-form-item label="可容纳人数">
+          <el-input v-model="formAdd.capacity" type="number" min="0" placeholder="可容纳人数"></el-input>
+        </el-form-item>
+
+        <el-form-item label="是否可用">
+          <el-radio v-model="formAdd.enabled" label="2">否</el-radio>
+          <el-radio v-model="formAdd.enabled" label="1">是</el-radio>
+        </el-form-item>
+        <a class="btn-add" type="primary" @click="save()">确定添加</a>
+      </el-form>
+    </el-dialog>
+    <!-- 新增弹框结束 -->
     <!-- 编辑弹框---start -->
     <el-dialog title="修改实验室信息" :visible.sync="dialogFormVisible" width="400px">
       <el-form
@@ -161,15 +163,6 @@ h2 {
 .el-form-item__content {
   width: 220px;
 }
-
-.tabwidth {
-  width: 640px;
-  float: left;
-}
-.wide {
-  width: 400px;
-  float: left;
-}
 </style>
 
 <script>
@@ -178,6 +171,7 @@ export default {
   name: "labs",
   data() {
     return {
+      loading: false,
       rules: {
         classroomNumber: [
           { required: true, messsage: "请输入实验室编号", trigger: "blur" }
@@ -197,10 +191,10 @@ export default {
           }
         ]
       },
-      select:"",
-      search:"",
-      searchFlag:false,
-      fileList:"",
+      select: "",
+      search: "",
+      searchFlag: false,
+      fileList: "",
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
@@ -242,32 +236,39 @@ export default {
   },
   methods: {
     //搜索
-      searchAll(page,size){
-      let str = {}
-      if(this.select=="classroomName"){
+    searchAll(page, size) {
+      this.loading = true;
+      let str = {};
+      if (this.select == "classroomName") {
         str.classroomName = this.search;
-      }else if(this.select=="classroomNumber"){
-        str.classroomNumber = this.search
+      } else if (this.select == "classroomNumber") {
+        str.classroomNumber = this.search;
+      } else {
+        this.$message.error("请选择搜索关键字");
       }
-      labsApi.search(this.pageInfo.pageIndex,this.pageInfo.pageSize,str).then(res => {
-        if(res.code == "140001"){
-          this.tableData = res.result.results
-          this.searchFlag = true;
-          this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
-        }else{
-          this.$message.error("error" + res.message)
-        }
-      }).catch(error => {
-        this.$message.error("" + error)
-      })
+      labsApi
+        .search(this.pageInfo.pageIndex, this.pageInfo.pageSize, str)
+        .then(res => {
+          if (res.code == "140001") {
+            this.tableData = res.result.results;
+            this.searchFlag = true;
+            this.loading = false;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error("" + error);
+        });
     },
     // 导入模块
-    cleanCache(){
-      this.tip = '';
-      this.errorTip = ''
-      this.tableDataCache = []
-      this.fileList =[];
-      this.dialogUploadVisible = true
+    cleanCache() {
+      this.tip = "";
+      this.errorTip = "";
+      this.tableDataCache = [];
+      this.fileList = [];
+      this.dialogUploadVisible = true;
     },
     submitUpload() {
       labsApi
@@ -380,12 +381,14 @@ export default {
       this.dialogFormVisible = true;
     },
     queryTable(index, size) {
+      this.loading = true;
       labsApi
         .query(index, size)
         .then(res => {
           if (res.code == "140001") {
             this.$message.success("请求成功");
             this.tableData = res.result.results;
+            this.loading = false;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
             this.$message.error("请求失败，错误描述为：" + res.message);
@@ -430,17 +433,17 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
-      if(this.searchFlag){
-        this.searchAll(this.pageInfo.pageSize,val)
-        return
+      if (this.searchFlag) {
+        this.searchAll(this.pageInfo.pageSize, val);
+        return;
       }
       this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
-      if(this.searchFlag){
-        this.searchAll(val, this.pageInfo.pageSize)
-        return
+      if (this.searchFlag) {
+        this.searchAll(val, this.pageInfo.pageSize);
+        return;
       }
       this.queryTable(val, this.pageInfo.pageSize);
     },
@@ -453,19 +456,19 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
-    check(param){
-        for(let item in param){
-        if(param[item] == ''){
-          this.$message.error("请把信息输入完整，不得为空!")
-          return false
+    check(param) {
+      for (let item in param) {
+        if (param[item] == "") {
+          this.$message.error("请把信息输入完整，不得为空!");
+          return false;
         }
       }
-      return true
+      return true;
     },
     save() {
       if (!this.dialogFormVisible) {
-        if(!this.check(this.formAdd)){
-          return false
+        if (!this.check(this.formAdd)) {
+          return false;
         }
         labsApi
           .add(this.formAdd)
@@ -473,6 +476,7 @@ export default {
             if (res.code == "140001") {
               this.$message.success("添加成功");
               this.formAdd = {};
+              this.dialogAddVisible = false;
               this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
             } else {
               this.$message.error("error：" + res.message);
@@ -482,8 +486,8 @@ export default {
             this.$message.error(error + "");
           });
       } else {
-        if(!this.check(this.formEdit)){
-          return false
+        if (!this.check(this.formEdit)) {
+          return false;
         }
         labsApi
           .update(this.formEdit)

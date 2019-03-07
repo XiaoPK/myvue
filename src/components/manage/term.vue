@@ -14,6 +14,7 @@
       style="width: 100%"
       :default-sort="{prop: 'termId', order: 'descending'}"
       @selection-change="handleSelectionChange"
+      v-loading="loading"
     >
       <el-table-column type="selection" width="50"></el-table-column>
       <el-table-column prop="termName" sortable label="学期" width="100"></el-table-column>
@@ -52,11 +53,21 @@
           <el-input v-model="formAdd.termName" placeholder="学期"></el-input>
         </el-form-item>
         <el-form-item label="开始时间" prop="beginDay">
-          <el-date-picker v-model="formAdd.beginDay"  value-format="yyyy-MM-dd" type="date" placeholder="选择日期"></el-date-picker>
+          <el-date-picker
+            v-model="formAdd.beginDay"
+            value-format="yyyy-MM-dd"
+            type="date"
+            placeholder="选择日期"
+          ></el-date-picker>
         </el-form-item>
 
         <el-form-item label="结束时间" prop="endDay">
-          <el-date-picker v-model="formAdd.endDay"  value-format="yyyy-MM-dd" type="date" placeholder="选择日期"></el-date-picker>
+          <el-date-picker
+            v-model="formAdd.endDay"
+            value-format="yyyy-MM-dd"
+            type="date"
+            placeholder="选择日期"
+          ></el-date-picker>
         </el-form-item>
         <el-form-item label="教学周数" prop="teachWeeks">
           <el-input v-model="formAdd.teachWeeks" placeholder="教学周数"></el-input>
@@ -89,7 +100,7 @@
   </div>
 </template>
 
-<style>
+<style scroped>
 .el-form-item__content {
   width: 220px;
 }
@@ -105,6 +116,7 @@ export default {
   name: "term",
   data() {
     return {
+      loading: false,
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
@@ -132,17 +144,20 @@ export default {
         termName: "",
         weeks: ""
       },
-      offerCourses:[],
+      offerCourses: [],
       multipleSelection: []
     };
   },
   methods: {
-      timestampToTime(timestamp) {
-        var date = new Date(timestamp);//时间戳为10位需*1000，时间戳为13位的话不需乘1000
-        var Y = date.getFullYear() + '-';
-        var M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1) + '-';
-        var D = date.getDate();
-        return Y+M+D;
+    timestampToTime(timestamp) {
+      var date = new Date(timestamp); //时间戳为10位需*1000，时间戳为13位的话不需乘1000
+      var Y = date.getFullYear() + "-";
+      var M =
+        (date.getMonth() + 1 < 10
+          ? "0" + (date.getMonth() + 1)
+          : date.getMonth() + 1) + "-";
+      var D = date.getDate();
+      return Y + M + D;
     },
     //得到课程
     getCourses() {
@@ -184,6 +199,7 @@ export default {
         });
     },
     queryTable(index, size) {
+      this.loading = true;
       termApi
         .query(index, size)
         .then(res => {
@@ -191,15 +207,16 @@ export default {
           if (res.code == "140001") {
             let re = res.result.results;
             for (let i = 0; i < re.length; i++) {
-                re[i].beginDay = this.timestampToTime(re[i].beginDay)
-                re[i].endDay = this.timestampToTime(re[i].endDay)
-                let str = ''
-                for(let j = 0; j < re[i].offerCourses.length; j++){
-                    str += re[i].offerCourses[j] + ','
-                }   
-                re[i].offerCourses = str;
+              re[i].beginDay = this.timestampToTime(re[i].beginDay);
+              re[i].endDay = this.timestampToTime(re[i].endDay);
+              let str = "";
+              for (let j = 0; j < re[i].offerCourses.length; j++) {
+                str += re[i].offerCourses[j] + ",";
+              }
+              re[i].offerCourses = str;
             }
             this.tableData = re;
+            this.loading = false;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
             this.$message.error("请求失败，错误描述为：" + res.message);
@@ -243,10 +260,10 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
-   
+
     save() {
-        this.formAdd.offerCourses = this.offerCourses;
-        console.log(this.formAdd)
+      this.formAdd.offerCourses = this.offerCourses;
+      console.log(this.formAdd);
       termApi
         .add(this.formAdd)
         .then(res => {

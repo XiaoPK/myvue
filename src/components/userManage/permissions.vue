@@ -25,23 +25,20 @@
     </el-table>
     <!-- 表格---end -->
     <!-- 新增弹框---start -->
-    <el-dialog title="添加新权限" :visible.sync="dialogAddVisible" width="700px">
+    <el-dialog title="添加新权限" :visible.sync="dialogAddVisible" width="800px">
       <el-form
         :label-position="labelPosition"
         :label-width="labelWidth"
-        :inline="true"
         :model="formAdd"
-        class="demo-form-inline"
       >
         <el-form-item label="权限">
-          <el-checkbox-group v-model="menuArray" size="medium">
-            <el-checkbox
+          <el-checkbox-group v-model="menuArray" size="medium" style="width:600px">
+            <el-checkbox-button
               v-for="menu in menuData"
               :label="menu.id"
               :key="menu.id"
               :value="menu.id"
-              border
-            >{{menu.menuName}}</el-checkbox>
+            >{{menu.menuName}}</el-checkbox-button>
           </el-checkbox-group>
         </el-form-item>
         <el-form-item label="角色">
@@ -65,7 +62,7 @@
   </div>
 </template>
 
-<style>
+<style  scroped>
 .right {
   float: right;
 }

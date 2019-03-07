@@ -62,7 +62,6 @@
     </div>
   </div>
 </template>
-btn-step
 <script>
 import * as termApi from "../../apis/term.js";
 import * as courseApi from "../../apis/courses.js";

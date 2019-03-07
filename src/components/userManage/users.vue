@@ -2,14 +2,13 @@
   <div>
     <!-- 操作区----start -->
     <el-row>
-      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加新菜单</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加新角色</el-button>
     </el-row>
     <br>
     <!-- 操作区----end -->
     <!-- 表格---start -->
     <el-table :data="tableData" stripe style="width: 100%">
-      <el-table-column prop="account" label="账户" width="100"></el-table-column>
-      <el-table-column prop="password" label="密码" width="400"></el-table-column>
+      <el-table-column prop="account" label="账户" width="200"></el-table-column>
       <el-table-column prop="userType" label="用户类型" width="100px"></el-table-column>
       <el-table-column label="操作" fixed="right">
         <template slot-scope="scope">
@@ -19,21 +18,23 @@
     </el-table>
     <!-- 表格---end -->
     <!-- 新增弹框---start -->
-    <el-dialog title="添加新角色" :visible.sync="dialogAddVisible" width="700px">
+    <el-dialog title="添加新角色" :visible.sync="dialogAddVisible" width="400px">
       <el-form
         :label-position="labelPosition"
         :label-width="labelWidth"
-        :inline="true"
+        :rules="rules"
         :model="formAdd"
-        class="demo-form-inline"
       >
-        <el-form-item label="账户">
-          <el-input v-model="formAdd.account" placeholder="账户"></el-input>
+        <el-form-item label="账户" prop="account">
+          <el-input v-model="formAdd.account" placeholder="账户" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="密码">
-          <el-input v-model="formAdd.password" placeholder="密码"></el-input>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="formAdd.password" placeholder="密码" type="password" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="用户类型">
+         <el-form-item label="确认密码" prop="checkPass">
+          <el-input v-model="checkPass" placeholder="确认密码" type="password" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="用户类型" prop="userType">
           <el-radio v-model="formAdd.userType" label="1">管理员</el-radio>
           <el-radio v-model="formAdd.userType" label="2">教师</el-radio>
           <el-radio v-model="formAdd.userType" label="3">学生</el-radio>
@@ -57,7 +58,7 @@
   </div>
 </template>
 
-<style>
+<style scoped>
 .right {
   float: right;
 }
@@ -69,7 +70,24 @@ import * as userApi from "../../apis/permission/user.js";
 export default {
   name: "permission",
   data() {
+    var validatePass2 = (rule, value, callback) => {
+      console.log(this.formAdd.password)
+      console.log(this.checkPass)
+      if (this.checkPass == "") {
+        callback(new Error("请再次输入密码"));
+      } else if (this.checkPass != this.formAdd.password) {
+        callback(new Error("两次输入密码不一致!"));
+      } else {
+        callback();
+      }
+    };
     return {
+       rules: {
+         account:[{ required: true, trigger: "blur"}],
+        password: [{ required: true, trigger: "blur" }],
+        checkPass: [{ required: true, validator: validatePass2, trigger: "blur" }],
+        userType:[{ required: true, trigger: "blur"}]
+      },
       roleData: [],
       tableData: [],
       labelPosition: "right", //lable对齐方式
@@ -81,6 +99,7 @@ export default {
       },
       dialogAddVisible: false,
       formLabelWidth: "120px",
+      checkPass:'',
       formAdd: {
         account: "",
         password: "",

@@ -23,10 +23,59 @@
     import bus from './bus.js'
     import { mapState } from 'vuex'
     export default {
+        props:['userType'],
         data() {
             return {
                 collapse: false,
-                menuList: [
+                menuList:""
+            }
+        },
+        //mapState 用来监控多个函数的变化
+        computed:mapState({
+            //menuList:state=>state.menu.menuList,
+            onRoutes(){
+                return this.$route.path.replace('/','');
+            }
+        }),
+        created(){
+            // 通过 Event Bus 进行组件间通信，来折叠侧边栏
+            bus.$on('collapse', msg => {
+                this.collapse = msg;
+            })
+
+            if(this.userType == 'TEACHER'){
+                this.menuList = [
+                    {
+                         icon: 'el-icon-tickets',
+                        index:'1',
+                        title:"相关课程",
+                        subs:[{
+                            index:"yourCourse",
+                            title:"最近课程"
+                        },
+                        {
+                            index:"classManage",
+                            title:"课堂管理"
+                        }
+                        ]
+                    },
+                    {
+                         icon: 'el-icon-tickets',
+                        index:'2',
+                        title:"个人信息",
+                        subs:[{
+                            index:"personalInfo",
+                            title:"修改个人信息"
+                        },
+                        {
+                            index:"changePassword",
+                            title:"修改密码"
+                        }
+                        ]
+                    }, 
+                ]
+            }else if(this.userType == 'ADMIN'){
+                this.menuList = [
                     {
                          icon: 'el-icon-tickets',
                         index:'1',
@@ -127,19 +176,6 @@
                     }
                 ]
             }
-        },
-        //mapState 用来监控多个函数的变化
-        computed:mapState({
-            //menuList:state=>state.menu.menuList,
-            onRoutes(){
-                return this.$route.path.replace('/','');
-            }
-        }),
-        created(){
-            // 通过 Event Bus 进行组件间通信，来折叠侧边栏
-            bus.$on('collapse', msg => {
-                this.collapse = msg;
-            })
         }
     }
 </script>
@@ -151,7 +187,6 @@
         left: 0;
         top: 70px;
         bottom:0;
-        overflow-y: scroll;
     }
     /*/定义滚动条的样式 */
     .sidebar::-webkit-scrollbar{

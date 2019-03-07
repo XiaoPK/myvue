@@ -14,3 +14,7 @@ export const assignSimple = (termId,rules) => {
 export const query = () => {
   return http.requestQuickGet(apiUrl + "/assign/query/rule");
 }
+
+export const queryAll = () => {
+  return http.requestQuickGet(apiUrl +　"/assign/result/query/all")
+}

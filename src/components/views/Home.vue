@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
-    <v-head></v-head>
-    <v-sidebar></v-sidebar>
+    <v-head :name = 'this.name'></v-head>
+    <v-sidebar :userType = 'this.userType'></v-sidebar>
     <div class="content-box" :class="{'content-collapse':collapse}">
       <div class="content_wrapper">
         <v-tags></v-tags>
@@ -9,7 +9,9 @@
           <div class="content_inner">
             <transition name="move" mode="out-in">
               <keep-alive :include="tagsList">
-                <h1 style="font-weight: 200;margin-left: 50px; margin-right: 50px;">尊敬的{{ name }}，欢迎登陆实验室课程管理系统！</h1>
+                <h1
+                  style="font-weight: 200;margin-left: 50px; margin-right: 50px;"
+                >尊敬的{{ name }}，欢迎登陆实验室课程管理系统！</h1>
                 <router-view></router-view>
               </keep-alive>
             </transition>
@@ -27,17 +29,18 @@ import vHead from "./Header.vue";
 import vSidebar from "./Sidebar.vue";
 import vTags from "./Tags.vue";
 import bus from "./bus";
-import * as teacherApi from '../../apis/teachers.js'
+import * as teacherApi from "../../apis/teachers.js";
 export default {
   data() {
     return {
-        name:"",
+      name: "",
+      userType: sessionStorage.getItem('userType'),
       tagsList: [],
       collapse: false
     };
   },
-  methods:{
-       queryInfo() {
+  methods: {
+    queryInfo() {
       let str = { teacherNumber: sessionStorage.getItem("account") };
       teacherApi
         .search(1, 1, str)
@@ -45,7 +48,7 @@ export default {
           if (res.code == "140001") {
             console.log(res);
             this.name = res.result.results[0].teacherName;
-            sessionStorage.setItem("username",this.name)
+            sessionStorage.setItem("username", this.name);
           } else {
             this.$message.error("error" + res.message);
           }
@@ -53,15 +56,21 @@ export default {
         .catch(error => {
           this.$message.error("" + error);
         });
-    },
+    }
   },
   components: {
     vHead,
     vSidebar,
     vTags
   },
+  // beforeCreate(){
+  //    //判断有没有登录
+  //   if(!sessionStorage.getItem('account')){
+  //     this.$router.push('/login')
+  //   }
+  // },
   created() {
-      this.queryInfo()
+    this.queryInfo();
     bus.$on("collapse", msg => {
       this.collapse = msg;
     });

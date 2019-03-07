@@ -2,19 +2,21 @@
   <div>
     <el-row>
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
+       <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加选课信息</el-button>
     </el-row>
-    <div class="tabwidth">
+    <div>
       <el-table
         :data="tableData"
         stripe
         :default-sort="{prop: 'termId', order: 'descending'}"
         @selection-change="handleSelectionChange"
+        v-loading="loading"
       >
         <el-table-column type="selection" width="50"></el-table-column>
-        <el-table-column prop="termId" sortable label="学期" width="180"></el-table-column>
-        <el-table-column prop="studentId" label="学生" width="180"></el-table-column>
-        <el-table-column prop="courseId" label="所选课程" width="180"></el-table-column>
-        <el-table-column label="操作" fixed="right" min-width="120">
+        <el-table-column prop="termId" sortable label="学期ID" width="220"></el-table-column>
+        <el-table-column prop="studentId" label="学生ID" width="220"></el-table-column>
+        <el-table-column prop="courseId" label="所选课程ID" width="220"></el-table-column>
+        <el-table-column label="操作" fixed="right" min-width="200">
           <template slot-scope="scope">
             <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
           </template>
@@ -26,16 +28,14 @@
         :current-page="pageInfo.pageIndex"
         :page-size="pageInfo.pageSize"
         :total="pageInfo.pageTotal"
-        :page-sizes="[5, 10, 20, 50]"
+        :page-sizes="[5, 10, 20, 50,10000]"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
       ></el-pagination>
     </div>
     <!-- 表格---end -->
-    <div class="wide" title="添加选课信息">
-      <el-row>
-        <h2>添加选课信息</h2>
-      </el-row>
+    <!-- 新增信息弹框 -->
+    <el-dialog title="添加选课信息" :visible.sync="dialogAddVisible" width="400px" style="text-align:center">
       <el-form :label-position="labelPosition" label-width="100px" :inline="true" :model="formAdd">
         <el-select v-model="formAdd.termId" placeholder="请选择学期">
           <el-option
@@ -46,7 +46,7 @@
           ></el-option>
         </el-select>
  
-        <el-select style="margin-top:20px;" v-model="formAdd.studentId" placeholder="请选择学生">
+        <el-select style="margin-top:20px" v-model="formAdd.studentId" placeholder="请选择学生">
           <el-option
             v-for="item in studentData"
             :key="item.studentNumber"
@@ -55,7 +55,7 @@
           ></el-option>
         </el-select>
 
-        <el-select style="margin-top:20px;" v-model="formAdd.courseId" placeholder="请选择课程">
+        <el-select style="margin-top:20px;margin-bottom:20px" v-model="formAdd.courseId" placeholder="请选择课程">
           <el-option
             v-for="item in courseData"
             :key="item.courseName"
@@ -66,11 +66,12 @@
 
         <a class="btn-add" type="primary" @click="save()">确定添加</a>
       </el-form>
-    </div>
+    </el-dialog>
+    <!-- 新增信息弹框结束 -->
   </div>
 </template>
 
-<style>
+<style  scroped>
 h2 {
   text-align: center;
   font-weight: normal;
@@ -116,6 +117,7 @@ import * as termApi from "../../apis/term.js";
 export default {
   data() {
     return {
+      loading:false,
       pageInfo: {
         pageIndex: 1,
         pageSize: 5,
@@ -137,6 +139,7 @@ export default {
         courseId: "",
         studentId: ""
       },
+      dialogAddVisible:false,
       labelPosition: "right", //lable对齐方式
       labelWidth: "80px", //lable宽度
       multipleSelection: []
@@ -190,11 +193,13 @@ export default {
         });
     },
     queryTable(index, size) {
+      this.loading=true
       stuCouApi
         .query(index, size)
         .then(res => {
           if (res.code == "140001") {
             this.tableData = res.result.results;
+            this.loading=false
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
             this.$message.error("请求失败，错误描述为：" + res.message);

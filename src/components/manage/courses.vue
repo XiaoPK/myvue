@@ -3,10 +3,11 @@
     <!-- 操作区----start -->
     <el-row>
       <el-button size="medium" type="danger" @click="deleteMany">批量删除</el-button>
+      <el-button size="medium" type="primary" @click="dialogAddVisible = true">添加课程</el-button>
       <el-button size="medium" type="primary" @click="cleanCache">导入数据</el-button>
       <a href="http://alish1.iyuhui.cn:8089/course/query/1/1000/export/excel
 " class="export">导出数据</a>
-<div style="display:inline-block;margin-left:150px;">
+      <div style="display:inline-block;margin-left:150px;">
         <el-input placeholder="请输入内容" size="medium" v-model="search" class="input-with-select">
           <el-select v-model="select" slot="prepend" placeholder="请选择">
             <el-option label="名称" value="courseName"></el-option>
@@ -18,68 +19,64 @@
     </el-row>
     <br>
     <div>
-      <div class="tabwidth">
-       
-        <!-- 表格---start -->
-        <el-table
-          :data="tableData"
-          stripe
-          style="width: 640px"
-          :default-sort="{prop: 'courseNumber', order: 'descending'}"
-          @selection-change="handleSelectionChange"
-        >
-          <el-table-column type="selection" width="50"></el-table-column>
-          <el-table-column prop="courseNumber" sortable label="课程编号" width="100"></el-table-column>
-          <el-table-column prop="courseName" label="课程名称" width="100"></el-table-column>
-          <el-table-column prop="period" label="课时" width="50"></el-table-column>
-          <el-table-column prop="courseDesc" label="课程简介" width="160"></el-table-column>
-          <el-table-column label="操作" fixed="right" min-width="120">
-            <template slot-scope="scope">
-              <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
-              <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-        <el-pagination
-          background
-          layout="total,sizes,prev, pager, next,jumper"
-          :current-page="pageInfo.pageIndex"
-          :page-size="pageInfo.pageSize"
-          :total="pageInfo.pageTotal"
-          :page-sizes="[5, 10, 20, 50]"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-        ></el-pagination>
-        <!-- 表格---end -->
-      </div>
-      <div class="right wide" title="添加课程信息">
-        <el-row>
-          <h2>添加课程信息</h2>
-        </el-row>
-        <el-form
-          :rules="rules"
-          :label-position="labelPosition"
-          label-width="100px"
-          :inline="true"
-          :model="formAdd"
-        >
-          <el-form-item label="课程编号" prop="courseNumber">
-            <el-input v-model="formAdd.courseNumber" placeholder="课程编号"></el-input>
-          </el-form-item>
-          <el-form-item label="课程名称" prop="courseName">
-            <el-input v-model="formAdd.courseName" placeholder="课程名称"></el-input>
-          </el-form-item>
-          <el-form-item label="课时量" prop="period">
-            <el-input v-model="formAdd.period" type="number" placeholder="课时量"></el-input>
-          </el-form-item>
-          <el-form-item label="课程简介" prop="courseDesc">
-            <el-input type="textarea" v-model="formAdd.courseDesc" placeholder="课程简介"></el-input>
-          </el-form-item>
-
-          <a class="btn-add" type="primary" @click="save()">确定添加</a>
-        </el-form>
-      </div>
+      <!-- 表格---start -->
+      <el-table
+        :data="tableData"
+        stripe
+        :default-sort="{prop: 'courseNumber', order: 'descending'}"
+        @selection-change="handleSelectionChange"
+        v-loading="loading"
+      >
+        <el-table-column type="selection" width="50"></el-table-column>
+        <el-table-column prop="courseNumber" sortable label="课程编号" width="150"></el-table-column>
+        <el-table-column prop="courseName" label="课程名称" width="180"></el-table-column>
+        <el-table-column prop="period" label="课时" width="100"></el-table-column>
+        <el-table-column prop="courseDesc" label="课程简介" width="260"></el-table-column>
+        <el-table-column label="操作" fixed="right" min-width="200">
+          <template slot-scope="scope">
+            <el-button size="mini" @click="handleEdit(scope.row)">编辑</el-button>
+            <el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <el-pagination
+        background
+        layout="total,sizes,prev, pager, next,jumper"
+        :current-page="pageInfo.pageIndex"
+        :page-size="pageInfo.pageSize"
+        :total="pageInfo.pageTotal"
+        :page-sizes="[5, 10, 20, 50, 1000]"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      ></el-pagination>
+      <!-- 表格---end -->
     </div>
+
+    <!-- 新增弹框 -->
+    <el-dialog title="添加实验室信息" :visible.sync="dialogAddVisible" width="400px">
+      <el-form
+        :rules="rules"
+        :label-position="labelPosition"
+        label-width="100px"
+        :inline="true"
+        :model="formAdd"
+      >
+        <el-form-item label="课程编号" prop="courseNumber">
+          <el-input v-model="formAdd.courseNumber" placeholder="课程编号"></el-input>
+        </el-form-item>
+        <el-form-item label="课程名称" prop="courseName">
+          <el-input v-model="formAdd.courseName" placeholder="课程名称"></el-input>
+        </el-form-item>
+        <el-form-item label="课时量" prop="period">
+          <el-input v-model="formAdd.period" type="number" placeholder="课时量"></el-input>
+        </el-form-item>
+        <el-form-item label="课程简介" prop="courseDesc">
+          <el-input type="textarea" v-model="formAdd.courseDesc" placeholder="课程简介"></el-input>
+        </el-form-item>
+        <a class="btn-add" type="primary" @click="save()">确定添加</a>
+      </el-form>
+    </el-dialog>
+    <!-- 新增弹框结束 -->
     <!-- 编辑弹框---start -->
     <el-dialog title="修改课程信息" :visible.sync="dialogFormVisible" width="400px">
       <el-form
@@ -158,15 +155,6 @@ h2 {
 .el-form-item__content {
   width: 220px;
 }
-
-.tabwidth {
-  width: 640px;
-  float: left;
-}
-.wide {
-  width: 400px;
-  float: left;
-}
 .btn-add {
   display: block;
   width: 220px;
@@ -192,18 +180,19 @@ export default {
   courseName: "courses",
   data() {
     return {
-      select:"",
-      search:"",
-      searchFlag:false,
-      fileList:[],
+      loading: false,
+      select: "",
+      search: "",
+      searchFlag: false,
+      fileList: [],
       pageInfo: {
         pageIndex: 1,
         pageSize: 10,
         pageTotal: 1
       },
-      disabled:"",
+      disabled: "",
       tableData: [],
-      tableDataCache:[],
+      tableDataCache: [],
       labelPosition: "right", //lable对齐方式
       labelWidth: "100px", //lable宽度
       form: {
@@ -249,31 +238,38 @@ export default {
   },
   methods: {
     //搜索
-      searchAll(page,size){
-      let str = {}
-      if(this.select=="courseName"){
+    searchAll(page, size) {
+      this.loading = true;
+      let str = {};
+      if (this.select == "courseName") {
         str.courseName = this.search;
-      }else if(this.select=="courseNumber"){
-        str.courseNumber = this.search
+      } else if (this.select == "courseNumber") {
+        str.courseNumber = this.search;
+      } else {
+        this.$message.error("请选择搜索关键字");
       }
-      courseApi.search(this.pageInfo.pageIndex,this.pageInfo.pageSize,str).then(res => {
-        if(res.code == "140001"){
-          this.tableData = res.result.results
-          this.searchFlag = true;
-          this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
-        }else{
-          this.$message.error("error" + res.message)
-        }
-      }).catch(error => {
-        this.$message.error("" + error)
-      })
+      courseApi
+        .search(this.pageInfo.pageIndex, this.pageInfo.pageSize, str)
+        .then(res => {
+          if (res.code == "140001") {
+            this.tableData = res.result.results;
+            this.searchFlag = true;
+            this.loading = false;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error("" + error);
+        });
     },
-    cleanCache(){
-      this.tip = '';
-      this.errorTip = ''
-      this.tableDataCache = []
-      this.fileList =[];
-      this.dialogUploadVisible = true
+    cleanCache() {
+      this.tip = "";
+      this.errorTip = "";
+      this.tableDataCache = [];
+      this.fileList = [];
+      this.dialogUploadVisible = true;
     },
     submitUpload() {
       courseApi
@@ -281,9 +277,11 @@ export default {
         .then(res => {
           if (res.result.cached) {
             this.tip = "文件缓存成功,请及时保存!";
-            this.disabled = false
+            this.disabled = false;
           } else {
-            this.$message.error("缓存失败,请按照报错信息修改后重新上传！" + res.message);
+            this.$message.error(
+              "缓存失败,请按照报错信息修改后重新上传！" + res.message
+            );
           }
         })
         .catch(error => {
@@ -297,7 +295,7 @@ export default {
           console.log(res);
           if (res.code == "140001") {
             this.$message.success("保存成功!");
-            this.queryTable(this.pageInfo.pageIndex,this.pageInfo.pageSize)
+            this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
           } else {
             this.$message.error("保存失败:" + res.message);
           }
@@ -323,7 +321,7 @@ export default {
             param[i].classroomNumber +
             "发生错误：" +
             param[i].isError +
-            "'\'";
+            "''";
         }
       }
       console.log(this.errorTip);
@@ -410,12 +408,14 @@ export default {
     },
 
     queryTable(index, size) {
+      this.loading = true;
       courseApi
         .query(index, size)
         .then(res => {
           if (res.code == "140001") {
             this.tableData = res.result.results;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+            this.loading = false;
           } else {
             this.$message.error("请求失败，错误描述为：" + res.message);
           }
@@ -426,15 +426,15 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
-      if(this.searchFlag){
-        this.searchAll(this.pageInfo.pageIndex, val)
+      if (this.searchFlag) {
+        this.searchAll(this.pageInfo.pageIndex, val);
       }
       this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
-      if(this.searchFlag){
-        this.searchAll(val,this.pageInfo.pageSize)
+      if (this.searchFlag) {
+        this.searchAll(val, this.pageInfo.pageSize);
       }
       this.queryTable(val, this.pageInfo.pageSize);
     },
@@ -447,31 +447,32 @@ export default {
         this.deleteRow(ids[i]);
       }
     },
-    check(param){    
-      if(param.courseNumber == ''){
+    check(param) {
+      if (param.courseNumber == "") {
         this.$message.error("请输入课程编号");
-        return false
+        return false;
       }
-       if(param.courseName == ''){
+      if (param.courseName == "") {
         this.$message.error("请输入课程名称");
-        return false
+        return false;
       }
-      if(param.period == ''){
+      if (param.period == "") {
         this.$message.error("请输入课时量");
-        return false
+        return false;
       }
-      return true
+      return true;
     },
     save() {
       if (!this.dialogFormVisible) {
-        if(!this.check(this.formAdd)){
-          return false
+        if (!this.check(this.formAdd)) {
+          return false;
         }
         courseApi
           .add(this.formAdd)
           .then(res => {
             if (res.code == "140001") {
               this.$message.success("添加成功");
+              this.dialogAddVisible = false;
               this.formAdd = {};
               this.queryTable(this.pageInfo.pageIndex, this.pageInfo.pageSize);
             } else {
@@ -482,8 +483,8 @@ export default {
             this.$message.error(error + "");
           });
       } else {
-        if(!this.check(this.formEdit)){
-          return false
+        if (!this.check(this.formEdit)) {
+          return false;
         }
         courseApi
           .update(this.formEdit)

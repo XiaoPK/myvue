@@ -13,9 +13,10 @@
                     {{ name }}<i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <a href=" " target="_blank">
+                        <!-- <a href=" " target="_blank">
                             <el-dropdown-item>修改密码</el-dropdown-item>
-                        </a>
+                        </a> -->
+                        <el-dropdown-item  command = "changePw">修改密码</el-dropdown-item>
                         <el-dropdown-item divided  command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -26,25 +27,29 @@
 <script>
     import bus from './bus.js'
     export default {
+        //接受父组件的传值！
+        props:['name'],
         data() {
             return {
-                collapse: false,
-                name: ''
+                collapse: false
             }
         },
-        computed:{
-            // username(){
-            //     // let username = sessionStorage.getItem("username");
-            //     // console.log(username)
-            //     return username ? username : this.name;
-            // }
-        },
+        // computed:{
+        //     username(){
+        //         let username = sessionStorage.getItem("username");
+        //         console.log(username)
+        //         return username ? username : this.name;
+        //     }
+        // },
         methods:{
             // 用户名下拉菜单选择事件
             handleCommand(command) {
                 if(command == 'loginout'){
-                    sessionStorage.setItem('token',0)
+                    sessionStorage.clear()
                     this.$router.push('/login');
+                }
+                if(command == 'changePw'){
+                    this.$router.push('/changePassword')
                 }
             },
             // 侧边栏折叠
@@ -52,9 +57,10 @@
                 this.collapse = !this.collapse;
                 bus.$emit('collapse', this.collapse);
             },
+
         },
         created(){
-            this.name = sessionStorage.getItem('username')
+            
         }
     }
 </script>

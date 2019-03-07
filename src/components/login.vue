@@ -1,6 +1,6 @@
 <template>
-    <div class="bgc">
-		<h1>欢迎使用实验室管理系统</h1>
+    <div class="bgc" style="height:700px">
+		<h1 class="h1-style">欢迎使用实验室管理系统</h1>
 		<br>
 		<br>
         <div class="login-area">
@@ -13,7 +13,7 @@
                         <el-input v-model="loginForm.password" type="password" placeholder="password"></el-input>
                     </el-form-item>
                     <a class="btn-login" type="primary" @click="submitForm()">登录</a>
-					<a href="" class="textR" >忘记密码</a>
+					<a class="textR" @click="forgetPw">忘记密码</a>
                 </el-form>
                 <div v-if="sysMsg" class="err-msg">{{sysMsg}}</div>
             </div>
@@ -23,6 +23,7 @@
 
 <script>
 import * as userApi from "../apis/permission/user.js"
+import bus from './views/bus.js'
 export default {
     data() {
         return {
@@ -46,17 +47,24 @@ export default {
             userApi.login(this.loginForm).then(res => {
                 if(res.code == "140001"){
                     let token = res.result.token
+                    //console.log(res.result)
                     sessionStorage.setItem("token",token)
                     sessionStorage.setItem("account",this.loginForm.account)
+                    sessionStorage.setItem('password',this.loginForm.password)
+                    sessionStorage.setItem('userType',res.result.userType)
                     console.log(res.result.token)
+                    //console.log(sessionStorage)
                     this.$router.push('/')                   
                 }else{
-                    this.sysMsg="账号或密码错误！"
+                    this.$message.error('账号或密码错误！')
                 }
-            }).catch(error => {
-                this.sysMsg = "error" + error
+            }).catch(res => {
+                this.$message.error('账号或密码错误！')
             })
-		}
+        },
+        forgetPw(){
+            this.$router.push('/forgetPassword')
+        }
     }
 }
 </script>
@@ -93,9 +101,5 @@ export default {
 	.btn-login:hover{
 		background-color:rgb(15, 124, 233);
 	}
-	h1{
-		padding-top: 10%;
-		text-align: center;
-		font-size: 40px;
-	}
+
 </style>

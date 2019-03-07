@@ -1,18 +1,21 @@
 require('es6-promise').polyfill()
 import axios from 'axios'
+import bus from '../components/views/bus'
 
 
 axios.defaults.withCredentials = true //跨域
 axios.defaults.timeout = 1000000
 axios.defaults.headers.post['Content-Type'] = 'application/json'
-axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
 
+//console.log(bus.$on('token'))
 //axios.defaults.headers.token = sessionStorage.getItem('token')
 console.log(sessionStorage.getItem('token'))
 
 export default {
   //get请求
+
   requestGet(url, params = {}) {
+    axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
     axios.get(url, params).then(res => {
       resolve(res.data)
     }).catch(error => {
@@ -22,6 +25,7 @@ export default {
 
   //get请求不带参数
   requestQuickGet(url) {
+    axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
     return new Promise((resolve, reject) => {
       axios.get(url).then(res => {
         resolve(res.data)
@@ -33,6 +37,8 @@ export default {
 
   //post请求
   requestPost(url, params = {}) {
+    axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
+    console.log(sessionStorage.getItem('token'))
     return new Promise((resolve, reject) => {
       axios.post(url, params).then(res => {
         resolve(res.data)
@@ -59,6 +65,7 @@ export default {
 
   //put请求
   requestPut(url, params = {}) {
+    axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
     return new Promise((resolve, reject) => {
       axios.put(url, params).then(res => {
         resolve(res.data)
@@ -70,6 +77,7 @@ export default {
 
   //delete请求
   requestDelete(url, params = {}) {
+    axios.defaults.headers.common = { 'token' : sessionStorage.getItem('token') }
     return new Promise((resolve, reject) => {
       axios.delete(url, params).then(res => {
         resolve(res.data)

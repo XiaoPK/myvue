@@ -16,3 +16,7 @@ export const del = (menuID) => {
 export const login = (accPaw) => {
   return http.requestPost(apiUrl + "/login", accPaw)
 }
+
+export const update = (password) => {
+  return http.requestPost(apiUrl +"/update/password?password=" + password)
+}

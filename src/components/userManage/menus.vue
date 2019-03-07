@@ -65,7 +65,7 @@
   </div>
 </template>
 
-<style>
+<style  scroped>
 .right {
   float: right;
 }

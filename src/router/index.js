@@ -4,7 +4,7 @@ import home from '../components/views/Home.vue'
 
 Vue.use(Router)
 
-export default new Router({
+const vuerouter =  new Router({
   routes: [
     {
       path: '/',
@@ -153,6 +153,36 @@ export default new Router({
       path:"/index",
       name:"index",
       component: resolve => require(['../components/index.vue'],resolve)
+    },
+    {
+      path:"/forgetPassword",
+      name:'forgetPassword',
+      component: resolve => require(['../components/personal/forgetPassword.vue'], resolve)
     }
   ]
+});
+
+vuerouter.beforeEach(function(to,from,next){
+  console.log('跳转到:'+to)
+  if (to.path == '/login') {
+    next();
+  }
+  else {
+    var token = sessionStorage.getItem('token');
+    //如果没登录,都导向登录页
+    if (!token) {
+      if (to.path !== '/login') {
+        next({ path: '/login' })
+      }
+      else {
+        next();
+      }
+    }
+    else {
+      next();
+    }
+  }
 })
+
+export default vuerouter
+

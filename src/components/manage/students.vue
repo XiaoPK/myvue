@@ -28,6 +28,7 @@
       style="width: 100%"
       :default-sort="{prop: 'studentNumber', order: 'descending'}"
       @selection-change="handleSelectionChange"
+      v-loading="loading"
     >
       <el-table-column type="selection" width="55"></el-table-column>
       <el-table-column prop="studentNumber" sortable label="学号" width="150"></el-table-column>
@@ -49,7 +50,7 @@
       :current-page="pageInfo.pageIndex"
       :page-size="pageInfo.pageSize"
       :total="pageInfo.pageTotal"
-      :page-sizes="[5, 10, 20, 50]"
+      :page-sizes="[5, 10, 20, 50, 1000]"
       @size-change="handleSizeChange"
       @current-change="handleCurrentChange"
     ></el-pagination>
@@ -176,7 +177,7 @@
   </div>
 </template>
 
-<style>
+<style scroped>
 .el-form-item__content {
   width: 220px;
 }
@@ -203,9 +204,10 @@ export default {
   name: "students",
   data() {
     return {
-      search:"",
-      select:"",
-      searchFlag:false,
+      loading: false,
+      search: "",
+      select: "",
+      searchFlag: false,
       fileList: [],
       pageInfo: {
         pageIndex: 1,
@@ -253,34 +255,41 @@ export default {
     };
   },
   methods: {
-    searchAll(page,size){
-      let str = {}
-      if(this.select=="studentName"){
+    searchAll(page, size) {
+      let str = {};
+      this.loading = true;
+      if (this.select == "studentName") {
         str.studentName = this.search;
-      }else if(this.select=="studentNumber"){
-        str.studentNumber = this.search
-      }else if(this.select=="grade"){
-        str.grade = this.search
-      }else if(this.select=="college"){
-        str.college = this.search
+      } else if (this.select == "studentNumber") {
+        str.studentNumber = this.search;
+      } else if (this.select == "grade") {
+        str.grade = this.search;
+      } else if (this.select == "college") {
+        str.college = this.search;
+      } else {
+        this.$message.error("请输入搜索关键字");
       }
-      studentApi.search(this.pageInfo.pageIndex,this.pageInfo.pageSize,str).then(res => {
-        if(res.code == "140001"){
-          for (let i = 0; i < res.result.results.length; i++) {
+      studentApi
+        .search(this.pageInfo.pageIndex, this.pageInfo.pageSize, str)
+        .then(res => {
+          if (res.code == "140001") {
+            for (let i = 0; i < res.result.results.length; i++) {
               res.result.results[i].birthday = this.timestampToTime(
                 res.result.results[i].birthday
               );
               console.log(res.result.results[i]);
             }
-          this.tableData = res.result.results
-          this.searchFlag = true;
-          this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
-        }else{
-          this.$message.error("error" + res.message)
-        }
-      }).catch(error => {
-        this.$message.error("" + error)
-      })
+            this.tableData = res.result.results;
+            this.searchFlag = true;
+            this.loading = false;
+            this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
+          } else {
+            this.$message.error("error" + res.message);
+          }
+        })
+        .catch(error => {
+          this.$message.error("" + error);
+        });
     },
     cleanCache() {
       this.tip = "";
@@ -429,6 +438,7 @@ export default {
         });
     },
     queryTable(index, size) {
+      this.loading = true;
       studentApi
         .query(index, size)
         .then(res => {
@@ -442,6 +452,7 @@ export default {
               console.log(res.result.results[i]);
             }
             this.tableData = res.result.results;
+            this.loading = false;
             this.pageInfo.pageTotal = parseInt(res.result.totalRecord);
           } else {
             this.$message.error("请求失败，错误描述为：" + res.message);
@@ -469,17 +480,17 @@ export default {
     },
     handleSizeChange(val) {
       this.pageInfo.pageSize = val;
-      if(this.searchFlag){
-        this.searchAll(this.pageInfo.pageIndex, val)
-        return
+      if (this.searchFlag) {
+        this.searchAll(this.pageInfo.pageIndex, val);
+        return;
       }
       this.queryTable(this.pageInfo.pageIndex, val);
     },
     handleCurrentChange(val) {
       this.pageInfo.pageIndex = val;
-       if(this.searchFlag){
-        this.searchAll(val, this.pageInfo.pageSize)
-        return
+      if (this.searchFlag) {
+        this.searchAll(val, this.pageInfo.pageSize);
+        return;
       }
       this.queryTable(val, this.pageInfo.pageSize);
     },
