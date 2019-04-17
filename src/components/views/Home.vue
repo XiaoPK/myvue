@@ -11,7 +11,7 @@
               <keep-alive :include="tagsList">
                 <h1
                   style="font-weight: 200; margin-right: 50px;"
-                >尊敬的{{ name }}，您的角色为{{userType}}<br/>欢迎登陆实验室课程管理系统！</h1>
+                >{{ name }},欢迎登陆实验室课程管理系统！</h1>
                 <router-view></router-view>
               </keep-alive>
             </transition>
