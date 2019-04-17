@@ -10,8 +10,8 @@
             <transition name="move" mode="out-in">
               <keep-alive :include="tagsList">
                 <h1
-                  style="font-weight: 200;margin-left: 50px; margin-right: 50px;"
-                >尊敬的{{ name }}，欢迎登陆实验室课程管理系统！</h1>
+                  style="font-weight: 200; margin-right: 50px;"
+                >尊敬的{{ name }}，您的角色为{{userType}}<br/>欢迎登陆实验室课程管理系统！</h1>
                 <router-view></router-view>
               </keep-alive>
             </transition>
@@ -32,8 +32,9 @@ import bus from "./bus";
 import * as teacherApi from "../../apis/teachers.js";
 export default {
   data() {
+
     return {
-      name: "",
+      name: sessionStorage.getItem("account"),
       userType: sessionStorage.getItem('userType'),
       tagsList: [],
       collapse: false
@@ -42,20 +43,21 @@ export default {
   methods: {
     queryInfo() {
       let str = { teacherNumber: sessionStorage.getItem("account") };
-      teacherApi
-        .search(1, 1, str)
-        .then(res => {
-          if (res.code == "140001") {
-            console.log(res);
-            this.name = res.result.results[0].teacherName;
-            sessionStorage.setItem("username", this.name);
-          } else {
-            this.$message.error("error" + res.message);
-          }
-        })
-        .catch(error => {
-          this.$message.error("" + error);
-        });
+      //这里不需要请求老师，因为他可能是管理员
+      // teacherApi
+      //   .search(1, 1, str)
+      //   .then(res => {
+      //     if (res.code == "140001") {
+      //       console.log(res);
+      //       this.name = res.result.results[0].teacherName;
+      //       sessionStorage.setItem("username", this.name);
+      //     } else {
+      //       this.$message.error("error" + res.message);
+      //     }
+      //   })
+      //   .catch(error => {
+      //     this.$message.error("" + error);
+      //   });
     }
   },
   components: {
